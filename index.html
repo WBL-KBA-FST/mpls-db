@@ -1,0 +1,1567 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Property CRM</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0F1117;--bg2:#1A1D27;--bg3:#22263A;--bg4:#2A2F45;
+  --border:#2E3350;--border2:#3A4060;
+  --text:#F0F2FF;--text2:#8B92B8;--text3:#5A6080;
+  --accent:#6C63FF;--accent2:#8B85FF;--accent-bg:rgba(108,99,255,0.12);
+  --green:#22C55E;--green-bg:rgba(34,197,94,0.12);
+  --amber:#F59E0B;--amber-bg:rgba(245,158,11,0.12);
+  --red:#EF4444;--red-bg:rgba(239,68,68,0.12);
+  --blue:#3B82F6;--blue-bg:rgba(59,130,246,0.12);
+  --purple:#A855F7;--purple-bg:rgba(168,85,247,0.12);
+  --radius:12px;--radius-sm:8px;--radius-xs:6px;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+input,select,textarea{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-xs);color:var(--text);padding:9px 12px;font-family:'Inter',sans-serif;font-size:13px;outline:none;transition:border 0.2s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+input::placeholder,textarea::placeholder{color:var(--text3)}
+select option{background:var(--bg2)}
+button{cursor:pointer;font-family:'Inter',sans-serif}
+.screen{display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:var(--bg);z-index:10;padding:1rem}
+.screen.active{display:flex}
+.login-wrap{width:100%;max-width:420px}
+.login-logo{text-align:center;margin-bottom:2rem}
+.logo-icon{width:52px;height:52px;background:var(--accent);border-radius:14px;display:inline-flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:12px;box-shadow:0 0 40px rgba(108,99,255,0.4)}
+.logo-title{font-size:22px;font-weight:700;background:linear-gradient(135deg,#fff,#8B85FF);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo-sub{font-size:13px;color:var(--text2);margin-top:4px}
+.login-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:2rem}
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1.25rem}
+.role-btn{padding:12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg3);cursor:pointer;text-align:left;transition:all 0.2s}
+.role-btn:hover,.role-btn.selected{border-color:var(--accent);background:var(--accent-bg)}
+.role-btn-icon{font-size:18px;margin-bottom:4px}
+.role-btn-title{font-size:13px;font-weight:600}
+.role-btn-sub{font-size:11px;color:var(--text2);margin-top:2px}
+.role-btn-full{grid-column:1/-1}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:12px;color:var(--text2);margin-bottom:5px;font-weight:500}
+.pw-wrap{position:relative}
+.pw-wrap input{padding-right:40px}
+.pw-eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text2);font-size:15px;padding:0}
+.btn-login{width:100%;padding:11px;background:var(--accent);border:none;border-radius:var(--radius-sm);color:#fff;font-weight:600;font-size:14px;transition:all 0.2s;margin-top:4px}
+.btn-login:hover{background:var(--accent2);transform:translateY(-1px)}
+.notice{padding:10px 12px;border-radius:var(--radius-xs);font-size:12px;margin-bottom:10px;display:none;align-items:center;gap:8px;line-height:1.5}
+.notice-amber{background:var(--amber-bg);border:1px solid rgba(245,158,11,0.3);color:var(--amber)}
+.notice-red{background:var(--red-bg);border:1px solid rgba(239,68,68,0.3);color:var(--red)}
+.notice-green{background:var(--green-bg);border:1px solid rgba(34,197,94,0.3);color:var(--green)}
+.notice-purple{background:var(--purple-bg);border:1px solid rgba(168,85,247,0.3);color:var(--purple)}
+.notice-blue{background:var(--blue-bg);border:1px solid rgba(59,130,246,0.3);color:var(--blue)}
+.app{display:none;position:fixed;inset:0;flex-direction:row}
+.sidebar{width:220px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh}
+.sb-top{padding:1.25rem;border-bottom:1px solid var(--border)}
+.sb-av{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;margin-bottom:10px}
+.sb-name{font-size:14px;font-weight:600}
+.sb-role-txt{font-size:11px;color:var(--text2);margin-top:2px}
+.sb-sheet{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 8px;border-radius:20px;background:var(--green-bg);border:1px solid rgba(34,197,94,0.3);color:var(--green);font-weight:500;margin-top:6px}
+.sb-sheet-off{background:var(--red-bg);border-color:rgba(239,68,68,0.3);color:var(--red)}
+.sb-master{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 8px;border-radius:20px;background:var(--amber-bg);border:1px solid rgba(245,158,11,0.3);color:var(--amber);font-weight:500;margin-top:4px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 1rem;font-size:13px;cursor:pointer;color:var(--text2);margin:1px 8px;border-radius:var(--radius-xs);transition:all 0.15s;font-weight:500}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:var(--accent-bg);color:var(--accent);font-weight:600}
+.nav-item i{font-size:16px;flex-shrink:0;width:18px;text-align:center}
+.nav-section{font-size:10px;color:var(--text3);padding:1rem 1rem 0.35rem;text-transform:uppercase;letter-spacing:0.08em;font-weight:600}
+.sb-footer{margin-top:auto;padding:1rem;border-top:1px solid var(--border)}
+.btn-logout{width:100%;padding:8px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-xs);color:var(--text2);font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.2s}
+.btn-logout:hover{background:var(--red-bg);border-color:rgba(239,68,68,0.3);color:var(--red)}
+.main{flex:1;overflow-y:auto;background:var(--bg);padding:1.75rem}
+.main::-webkit-scrollbar{width:5px}
+.main::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+.page-header{margin-bottom:1.5rem}
+.page-title{font-size:20px;font-weight:700;letter-spacing:-0.3px}
+.page-sub{font-size:13px;color:var(--text2);margin-top:3px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem}
+.card-title{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:1rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:1rem}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.25rem}
+.metric{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem}
+.metric-label{font-size:12px;color:var(--text2);margin-bottom:6px;font-weight:500}
+.metric-val{font-size:26px;font-weight:700;letter-spacing:-0.5px}
+.metric-sub{font-size:11px;color:var(--text3);margin-top:4px}
+.tag{display:inline-flex;align-items:center;font-size:11px;padding:3px 9px;border-radius:20px;font-weight:600}
+.tag-green{background:var(--green-bg);color:var(--green);border:1px solid rgba(34,197,94,0.2)}
+.tag-amber{background:var(--amber-bg);color:var(--amber);border:1px solid rgba(245,158,11,0.2)}
+.tag-red{background:var(--red-bg);color:var(--red);border:1px solid rgba(239,68,68,0.2)}
+.tag-blue{background:var(--blue-bg);color:var(--blue);border:1px solid rgba(59,130,246,0.2)}
+.tag-gray{background:rgba(255,255,255,0.06);color:var(--text2);border:1px solid var(--border)}
+.tag-accent{background:var(--accent-bg);color:var(--accent);border:1px solid rgba(108,99,255,0.2)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:10px 12px;font-weight:600;color:var(--text3);border-bottom:1px solid var(--border);font-size:11px;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,0.015)}
+.btn{padding:7px 16px;border-radius:var(--radius-xs);font-size:13px;font-weight:500;border:1px solid var(--border);background:var(--bg3);color:var(--text);transition:all 0.15s}
+.btn:hover{background:var(--bg4)}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent2)}
+.btn-sm{padding:4px 12px;font-size:12px}
+.btn-danger{background:var(--red-bg);border-color:rgba(239,68,68,0.3);color:var(--red)}
+.form-row{display:flex;gap:10px}
+.form-row .field{flex:1}
+.field textarea{height:70px;resize:vertical}
+.divider{border:none;border-top:1px solid var(--border);margin:1rem 0}
+.chip-group{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem}
+.chip{padding:5px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--text2);transition:all 0.15s}
+.chip.active{background:var(--accent-bg);color:var(--accent);border-color:rgba(108,99,255,0.4)}
+.empty{text-align:center;padding:2.5rem;color:var(--text3);font-size:13px}
+.overflow-auto{overflow:auto}
+.overflow-auto::-webkit-scrollbar{height:4px}
+.overflow-auto::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+.prog-wrap{height:4px;background:var(--bg3);border-radius:10px;overflow:hidden;margin-top:5px}
+.prog-fill{height:4px;border-radius:10px}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.fu-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem;margin-bottom:8px}
+.url-input-wrap{display:flex;gap:8px;align-items:center}
+.url-input-wrap input{flex:1;font-family:monospace;font-size:12px}
+.url-status{font-size:11px;padding:2px 8px;border-radius:10px}
+.url-ok{background:var(--green-bg);color:var(--green)}
+.url-empty{background:var(--amber-bg);color:var(--amber)}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+
+<div id="screen-login" class="screen active">
+  <div class="login-wrap">
+    <div class="login-logo">
+      <div class="logo-icon">🏢</div>
+      <div class="logo-title">Property CRM</div>
+      <div class="logo-sub">Multi-sheet per Assman</div>
+    </div>
+    <div class="login-card">
+      <div class="role-grid">
+        <div class="role-btn selected" onclick="pilihRole('sales',this)"><div class="role-btn-icon">👤</div><div class="role-btn-title">Sales</div><div class="role-btn-sub">Input prospek</div></div>
+        <div class="role-btn" onclick="pilihRole('assman',this)"><div class="role-btn-icon">👥</div><div class="role-btn-title">Asst. Manager</div><div class="role-btn-sub">Kelola tim</div></div>
+        <div class="role-btn" onclick="pilihRole('manager',this)"><div class="role-btn-icon">💼</div><div class="role-btn-title">Manager</div><div class="role-btn-sub">Pantau project</div></div>
+        <div class="role-btn" onclick="pilihRole('gm',this)"><div class="role-btn-icon">👑</div><div class="role-btn-title">GM</div><div class="role-btn-sub">Analisa penuh</div></div>
+        <div class="role-btn role-btn-full" onclick="pilihRole('direktur',this)"><div class="role-btn-icon">🏛️</div><div class="role-btn-title">Direktur</div><div class="role-btn-sub">View only</div></div>
+      </div>
+      <div class="field"><label>Pilih nama</label><select id="login-name" onchange="onNameChange()"><option value="">-- Pilih nama --</option></select></div>
+      <div id="pw-section" style="display:none">
+        <div class="field"><label id="pw-label">Password</label>
+          <div class="pw-wrap"><input type="password" id="login-pw" placeholder="Masukkan password" onkeydown="if(event.key==='Enter')doLogin()"><button class="pw-eye" onclick="tglPW('login-pw',this)"><i class="ti ti-eye"></i></button></div>
+        </div>
+      </div>
+      <div id="notice-master" class="notice notice-amber"></div>
+      <div id="notice-err" class="notice notice-red">⚠️ Password salah.</div>
+      <button class="btn-login" onclick="doLogin()">Masuk →</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="app">
+  <div class="sidebar">
+    <div class="sb-top">
+      <div class="sb-av" id="sb-av"></div>
+      <div class="sb-name" id="sb-name"></div>
+      <div class="sb-role-txt" id="sb-role-txt"></div>
+      <div id="sb-sheet-status" class="sb-sheet" style="display:none"></div>
+      <div id="sb-master" class="sb-master" style="display:none">⚡ Master Access</div>
+    </div>
+    <div id="sidebar-nav" style="flex:1;overflow-y:auto;padding:0.5rem 0"></div>
+    <div class="sb-footer"><button class="btn-logout" onclick="doLogout()"><i class="ti ti-logout"></i> Keluar</button></div>
+  </div>
+  <div class="main" id="main"></div>
+</div>
+
+<script>
+// ================================================================
+// KONSTANTA & CONFIG
+// ================================================================
+const ROLE_COLORS={sales:{bg:'#22C55E',t:'#fff'},assman:{bg:'#3B82F6',t:'#fff'},manager:{bg:'#A855F7',t:'#fff'},gm:{bg:'#F59E0B',t:'#fff'},direktur:{bg:'#EF4444',t:'#fff'}};
+const ROLE_LABEL={sales:'Sales',assman:'Asst. Manager',manager:'Manager',gm:'General Manager',direktur:'Direktur Marketing'};
+const K={TEAM:'crm_team2',PW:'crm_pw2',LAP:'crm_lap2',URLS:'crm_urls2'};
+
+// ================================================================
+// DEFAULT TEAM — GM ubah via Manajemen Tim
+// ================================================================
+const DEF_TEAM={members:[
+  {id:'gm1',nama:'GM',role:'gm',project:'ALL',assman:''},
+  {id:'dir1',nama:'Direktur Marketing',role:'direktur',project:'ALL',assman:''},
+  // Manager
+  {id:'mgr1',nama:'Dedy Susanto',role:'manager',project:'WBL,KBA',assman:''},
+  {id:'mgr2',nama:'Ahmad Fauzi',role:'manager',project:'FST',assman:''},
+  // Assman WBL
+  {id:'a1',nama:'Julia',role:'assman',project:'WBL',assman:''},
+  {id:'a2',nama:'Isti',role:'assman',project:'WBL',assman:''},
+  {id:'a3',nama:'Feiby',role:'assman',project:'WBL',assman:''},
+  // Assman KBA
+  {id:'a4',nama:'Frans',role:'assman',project:'KBA',assman:''},
+  {id:'a5',nama:'Dhika',role:'assman',project:'KBA',assman:''},
+  {id:'a6',nama:'Ivy',role:'assman',project:'KBA',assman:''},
+  {id:'a7',nama:'Salam',role:'assman',project:'KBA',assman:''},
+  // Assman FST
+  {id:'a8',nama:'Christy',role:'assman',project:'FST',assman:''},
+  {id:'a9',nama:'Alfian',role:'assman',project:'FST',assman:''},
+  {id:'a10',nama:'Dira',role:'assman',project:'FST',assman:''},
+  {id:'a11',nama:'Hendra',role:'assman',project:'FST',assman:''},
+  // Sales WBL - Julia
+  {id:'s1',nama:'Ruslan',role:'sales',project:'WBL',assman:'Julia'},
+  {id:'s2',nama:'Bunga',role:'sales',project:'WBL',assman:'Julia'},
+  {id:'s3',nama:'Belton',role:'sales',project:'WBL',assman:'Julia'},
+  {id:'s4',nama:'Eka',role:'sales',project:'WBL',assman:'Julia'},
+  {id:'s5',nama:'Tika',role:'sales',project:'WBL',assman:'Julia'},
+  // Sales WBL - Isti
+  {id:'s6',nama:'Bagas',role:'sales',project:'WBL',assman:'Isti'},
+  {id:'s7',nama:'Chandra',role:'sales',project:'WBL',assman:'Isti'},
+  {id:'s8',nama:'Dani',role:'sales',project:'WBL',assman:'Isti'},
+  {id:'s9',nama:'Rani',role:'sales',project:'WBL',assman:'Isti'},
+  {id:'s10',nama:'Junita',role:'sales',project:'WBL',assman:'Isti'},
+  // Sales WBL - Feiby
+  {id:'s11',nama:'Citra',role:'sales',project:'WBL',assman:'Feiby'},
+  {id:'s12',nama:'Cynthia',role:'sales',project:'WBL',assman:'Feiby'},
+  {id:'s13',nama:'Mili',role:'sales',project:'WBL',assman:'Feiby'},
+  // Sales KBA - Frans
+  {id:'s14',nama:'Luna',role:'sales',project:'KBA',assman:'Frans'},
+  {id:'s15',nama:'Aswin',role:'sales',project:'KBA',assman:'Frans'},
+  {id:'s16',nama:'Nelvan',role:'sales',project:'KBA',assman:'Frans'},
+  // Sales KBA - Dhika
+  {id:'s17',nama:'Fajrin',role:'sales',project:'KBA',assman:'Dhika'},
+  {id:'s18',nama:'Nisha',role:'sales',project:'KBA',assman:'Dhika'},
+  // Sales KBA - Ivy
+  {id:'s19',nama:'Fitri',role:'sales',project:'KBA',assman:'Ivy'},
+  {id:'s20',nama:'Fathur',role:'sales',project:'KBA',assman:'Ivy'},
+  // Sales KBA - Salam
+  {id:'s21',nama:'Tahlil',role:'sales',project:'KBA',assman:'Salam'},
+  {id:'s22',nama:'Atta',role:'sales',project:'KBA',assman:'Salam'},
+  // Sales FST - Christy
+  {id:'s23',nama:'Rina',role:'sales',project:'FST',assman:'Christy'},
+  {id:'s24',nama:'Fahri',role:'sales',project:'FST',assman:'Christy'},
+  {id:'s25',nama:'Iva',role:'sales',project:'FST',assman:'Christy'},
+  // Sales FST - Alfian
+  {id:'s26',nama:'Ica',role:'sales',project:'FST',assman:'Alfian'},
+  {id:'s27',nama:'Anggi',role:'sales',project:'FST',assman:'Alfian'},
+  {id:'s28',nama:'Riani',role:'sales',project:'FST',assman:'Alfian'},
+  {id:'s29',nama:'Dea',role:'sales',project:'FST',assman:'Alfian'},
+  // Sales FST - Dira
+  {id:'s30',nama:'Anti',role:'sales',project:'FST',assman:'Dira'},
+  // Sales FST - Hendra
+  {id:'s31',nama:'Mega',role:'sales',project:'FST',assman:'Hendra'},
+  {id:'s32',nama:'Kiky',role:'sales',project:'FST',assman:'Hendra'},
+  {id:'s33',nama:'Amy',role:'sales',project:'FST',assman:'Hendra'},
+]};
+
+const DEF_PW={
+  gm:{'GM':'gm123'},
+  manager:{'Dedy Susanto':'manager123','Ahmad Fauzi':'manager123'},
+  sales:{
+    // WBL - Julia
+    'Ruslan':'sales123','Bunga':'sales123','Belton':'sales123','Eka':'sales123','Tika':'sales123',
+    // WBL - Isti
+    'Bagas':'sales123','Chandra':'sales123','Dani':'sales123','Rani':'sales123','Junita':'sales123',
+    // WBL - Feiby
+    'Citra':'sales123','Cynthia':'sales123','Mili':'sales123',
+    // KBA - Frans
+    'Luna':'sales123','Aswin':'sales123','Nelvan':'sales123',
+    // KBA - Dhika
+    'Fajrin':'sales123','Nisha':'sales123',
+    // KBA - Ivy
+    'Fitri':'sales123','Fathur':'sales123',
+    // KBA - Salam
+    'Tahlil':'sales123','Atta':'sales123',
+    // FST - Christy
+    'Rina':'sales123','Fahri':'sales123','Iva':'sales123',
+    // FST - Alfian
+    'Ica':'sales123','Anggi':'sales123','Riani':'sales123','Dea':'sales123',
+    // FST - Dira
+    'Anti':'sales123',
+    // FST - Hendra
+    'Mega':'sales123','Kiky':'sales123','Amy':'sales123',
+  },
+  assman:{
+    'Julia':'assman123','Isti':'assman123','Feiby':'assman123',
+    'Frans':'assman123','Dhika':'assman123','Ivy':'assman123','Salam':'assman123',
+    'Christy':'assman123','Alfian':'assman123','Dira':'assman123','Hendra':'assman123',
+  },
+  direktur:{'Direktur Marketing':'direktur123'}
+};
+
+// ================================================================
+// STATE
+// ================================================================
+let team,passwords,laporan;
+const DEF_URLS={
+  'Frans':'https://script.google.com/macros/s/AKfycbxZmpQjdTR_pBRVRq50DZZcczfon_8CIcFT7sIeAPrpWmcOTG3p6e3Qy46TFBnsZBFC/exec',
+};
+let assmanURLs={};
+let sheetCache={};
+let currentRole='',currentName='',selectedRole='sales';
+
+// ================================================================
+// CONFIG SHEET — ubah data tim, password, URL dari Google Sheet
+// Anda cukup edit sheet ini, semua device otomatis dapat data terbaru
+// ================================================================
+const CONFIG_SHEET_ID='1KLb8scxnnd_tPiQWItBM3-H-FEHW7Je0OqlbB0CpnqM';
+// Cek nomor HP aktif — aktifkan setelah berlangganan API
+const HP_CHECK_CONFIG = {
+  enabled: false,      // Ubah ke true setelah berlangganan
+  provider: 'fonnte',  // 'fonnte' atau 'wablas'
+  api_key: '',         // Isi API key setelah berlangganan
+};
+
+const CONFIG_URL=`https://docs.google.com/spreadsheets/d/${CONFIG_SHEET_ID}/gviz/tq?tqx=out:json&sheet=Sheet1`;
+
+async function loadConfigFromSheet(){
+  try{
+    const url=`https://docs.google.com/spreadsheets/d/${CONFIG_SHEET_ID}/gviz/tq?tqx=out:json&_=${Date.now()}`;
+    const res=await fetch(url);
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const text=await res.text();
+    const json=JSON.parse(text.replace(/^[^(]+\(|\);?\s*$/g,''));
+    const rows=json.table.rows;
+    if(!rows||rows.length<1)return false;
+    const newMembers=[],newPW={gm:{},direktur:{},manager:{},assman:{},sales:{}},newURLs={};
+    rows.forEach((row,idx)=>{
+      const c=row.c;
+      if(!c||!c[0]||!c[1])return;
+      // Kolom: 0=role, 1=nama, 2=project, 3=assman, 4=password, 5=script_url
+      const role=String(c[0]?c[0].v||'':'').trim();
+      const nama=String(c[1]?c[1].v||'':'').trim();
+      const project=String(c[2]?c[2].v||'':'').trim();
+      const assman=String(c[3]?c[3].v||'':'').trim();
+      const pw=String(c[4]?c[4].v||'':'').trim();
+      const scriptUrl=String(c[5]?c[5].v||'':'').trim();
+      if(!role||!nama)return;
+      newMembers.push({id:'cfg'+idx,nama,role,project,assman});
+      if(pw&&newPW[role]!==undefined)newPW[role][nama]=pw;
+      if(scriptUrl&&scriptUrl.startsWith('https://script.google.com')&&role==='assman')newURLs[nama]=scriptUrl;
+    });
+    if(newMembers.length>0){
+      team={members:newMembers};
+      passwords=newPW;
+      assmanURLs={...DEF_URLS,...newURLs};
+      localStorage.setItem('crm_team_cfg',JSON.stringify(team));
+      localStorage.setItem('crm_pw_cfg',JSON.stringify(passwords));
+      localStorage.setItem('crm_urls_cfg',JSON.stringify(assmanURLs));
+      localStorage.setItem('crm_cfg_loaded','1');
+      console.log('Config loaded:',newMembers.length,'members,',Object.keys(newURLs).length,'URLs');
+      return true;
+    }
+    return false;
+  }catch(e){
+    console.warn('loadConfigFromSheet error:',e.message);
+    return false;
+  }
+}
+
+function initData(){
+  try{
+    const cfgTeam=localStorage.getItem('crm_team_cfg');
+    const cfgPW=localStorage.getItem('crm_pw_cfg');
+    const cfgURLs=localStorage.getItem('crm_urls_cfg');
+    const l=localStorage.getItem(K.LAP);
+    team=cfgTeam?JSON.parse(cfgTeam):(localStorage.getItem(K.TEAM)?JSON.parse(localStorage.getItem(K.TEAM)):{...DEF_TEAM,members:[...DEF_TEAM.members]});
+    passwords=cfgPW?JSON.parse(cfgPW):(localStorage.getItem(K.PW)?JSON.parse(localStorage.getItem(K.PW)):JSON.parse(JSON.stringify(DEF_PW)));
+    laporan=l?JSON.parse(l):[];
+    assmanURLs=cfgURLs?{...DEF_URLS,...JSON.parse(cfgURLs)}:{...DEF_URLS,...(localStorage.getItem(K.URLS)?JSON.parse(localStorage.getItem(K.URLS)):{})};
+  }catch(e){
+    team={...DEF_TEAM,members:[...DEF_TEAM.members]};
+    passwords=JSON.parse(JSON.stringify(DEF_PW));
+    laporan=[];
+    assmanURLs={...DEF_URLS};
+  }
+}
+function save(){
+  try{
+    localStorage.setItem(K.TEAM,JSON.stringify(team));
+    localStorage.setItem(K.PW,JSON.stringify(passwords));
+    localStorage.setItem(K.LAP,JSON.stringify(laporan));
+    localStorage.setItem(K.URLS,JSON.stringify(assmanURLs));
+  }catch(e){}
+}
+
+// ================================================================
+// TEAM HELPERS
+// ================================================================
+function getByRole(r){return(team.members||[]).filter(m=>m.role===r);}
+function getSalesNames(){return getByRole('sales').map(m=>m.nama);}
+function getAssmanNames(){return getByRole('assman').map(m=>m.nama);}
+function getMgrNames(){return getByRole('manager').map(m=>m.nama);}
+function getSalesByAssman(a){return(team.members||[]).filter(m=>m.role==='sales'&&m.assman===a);}
+function getAssmanForMgr(mgr){const pp=getMgrProjects(mgr);return getByRole('assman').filter(a=>pp.includes(a.project));}
+function getMgrProjects(mgr){const m=(team.members||[]).find(x=>x.role==='manager'&&x.nama===mgr);return m?m.project.split(','):[];}
+function getAssmanOfSales(salesNama){const m=(team.members||[]).find(x=>x.role==='sales'&&x.nama===salesNama);return m?m.assman:'';}
+function getScriptURL(assmanNama){return assmanURLs[assmanNama]||'';}
+function genId(){return 'm'+Date.now();}
+
+// Ambil data dari cache sheet untuk assman tertentu
+function getSheetData(assmanNama){return sheetCache[assmanNama]||[];}
+function getAllSheetData(){
+  const all=[];
+  Object.values(sheetCache).forEach(rows=>rows.forEach(r=>all.push(r)));
+  return all;
+}
+function getMySheetData(){
+  if(currentRole==='sales'){
+    const ass=getAssmanOfSales(currentName);
+    return getSheetData(ass).filter(r=>r['Nama Sales Executives']===currentName);
+  }
+  if(currentRole==='assman') return getSheetData(currentName);
+  if(currentRole==='manager'){
+    const assL=getAssmanForMgr(currentName).map(a=>a.nama);
+    const all=[];assL.forEach(a=>getSheetData(a).forEach(r=>all.push(r)));return all;
+  }
+  return getAllSheetData();
+}
+
+// ================================================================
+// SHEET API
+// ================================================================
+async function callSheet(assmanNama, action, data={}){
+  const url=getScriptURL(assmanNama);
+  if(!url)return{success:false,message:`URL sheet ${assmanNama} belum didaftarkan. GM perlu set URL di Manajemen Tim.`};
+  try{
+    // Encode payload sebagai URL param untuk bypass CORS dari file:// lokal
+    const payload=JSON.stringify({action,...data});
+    const encoded=encodeURIComponent(payload);
+    // Gunakan GET dengan parameter untuk getAll, POST untuk write operations
+    if(action==='getAll'){
+      const res=await fetch(url+'?action=getAll',{method:'GET'});
+      return await res.json();
+    } else {
+      // Untuk write: gunakan fetch dengan mode no-cors tidak bisa dapat response
+      // Solusi: encode sebagai URL param dan POST
+      const res=await fetch(url,{
+        method:'POST',
+        body:payload,
+        headers:{'Content-Type':'text/plain;charset=utf-8'}
+      });
+      return await res.json();
+    }
+  }catch(err){
+    // Jika masih CORS error, coba via URL param
+    try{
+      const payload=JSON.stringify({action,...data});
+      const res=await fetch(url+'?payload='+encodeURIComponent(payload),{method:'GET'});
+      return await res.json();
+    }catch(err2){
+      return{success:false,message:'Gagal terhubung: '+err2.message+' (CORS error — pastikan Apps Script di-deploy dengan akses "Anyone")'};
+    }
+  }
+}
+
+async function fetchAssmanData(assmanNama){
+  const result=await callSheet(assmanNama,'getAll');
+  if(result.success&&result.data){
+    const normalized=result.data.map(row=>{
+      const r={...row};
+      if(r['Kontak Konsumen']!==null&&r['Kontak Konsumen']!==undefined)
+        r['Kontak Konsumen']=String(r['Kontak Konsumen']);
+      return r;
+    });
+    sheetCache[assmanNama]=normalized;
+    return normalized;
+  }
+  return sheetCache[assmanNama]||[];
+}
+
+async function fetchMyData(){
+  if(currentRole==='sales'){
+    const ass=getAssmanOfSales(currentName);
+    await fetchAssmanData(ass);
+  } else if(currentRole==='assman'){
+    await fetchAssmanData(currentName);
+  } else if(currentRole==='manager'){
+    const assL=getAssmanForMgr(currentName);
+    await Promise.all(assL.map(a=>fetchAssmanData(a.nama)));
+  } else {
+    // GM & Direktur: fetch semua assman yang punya URL
+    const allAss=getAssmanNames().filter(a=>getScriptURL(a));
+    await Promise.all(allAss.map(a=>fetchAssmanData(a)));
+  }
+}
+
+// ================================================================
+// HELPERS
+// ================================================================
+function tglPW(id,btn){const el=document.getElementById(id);const h=el.type==='password';el.type=h?'text':'password';btn.innerHTML=h?'<i class="ti ti-eye-off"></i>':'<i class="ti ti-eye"></i>';}
+function pct(a,b){return b===0?0:Math.round(a/b*100);}
+function validateHP(hp){
+  const c=String(hp||'').replace(/[\s\-\.\(\)]/g,'');
+  if(!c)return{valid:false,reason:'Nomor tidak boleh kosong',clean:''};
+  if(/[a-zA-Z]/.test(c))return{valid:false,reason:'Nomor tidak boleh mengandung huruf',clean:c};
+  // Tolak jika diawali 8 tanpa 0 di depan
+  if(c.startsWith('8'))return{valid:false,reason:'Nomor harus diawali 08, bukan 8. Contoh: 081234567890',clean:c};
+  let norm=c;
+  if(c.startsWith('+62'))norm='0'+c.slice(3);
+  else if(c.startsWith('62')&&c.length>=11)norm='0'+c.slice(2);
+  if(!/^08[0-9]{8,11}$/.test(norm))return{valid:false,reason:'Format salah. Gunakan: 08xx-xxxx-xxxx (10-13 digit)',clean:norm};
+  return{valid:true,clean:norm};
+}
+function todayISO(){return new Date().toISOString().split('T')[0];}
+function formatTgl(iso){if(!iso)return'—';const[y,m,d]=iso.split('-');return`${d}/${m}/${y}`;}
+function isDueToday(iso){return iso&&iso<=todayISO();}
+function isDueSoon(iso){if(!iso)return false;const diff=(new Date(iso)-new Date())/(864e5);return diff>=0&&diff<=3;}
+function stag(s){
+  const m={'Masih bisa di FU':'<span class="tag tag-green">● Masih bisa di FU</span>','Tidak bisa di FU':'<span class="tag tag-red">● Tidak bisa di FU</span>','Tidak minat apt':'<span class="tag tag-red">● Tidak minat</span>','Non prospek':'<span class="tag tag-gray">● Non prospek</span>'};
+  return m[s]||`<span class="tag tag-amber">● ${s||'—'}</span>`;
+}
+function scoreP(r){
+  let s=0;const iss=[];
+  if(validateHP(String(r['Kontak Konsumen']||'')).valid)s+=25;else iss.push('Kontak tidak valid');
+  if(r['Domisili Konsumen'])s+=10;else iss.push('Domisili kosong');
+  if(r['Rentang Usia Konsumen']||r['Rentang Usia Konsu'])s+=5;
+  if(r['Tujuan Pembelian Unit'])s+=10;else iss.push('Tujuan beli kosong');
+  if(String(r['Keterangan']||'').length>5)s+=20;else iss.push('Keterangan minim');
+  if(r['Status Konsumen']&&r['Status Konsumen']!=='Masih bisa di FU')s+=10;
+  if(r['Minat Unit'])s+=10;else iss.push('Minat unit kosong');
+  const g=s>=80?'A':s>=60?'B':s>=35?'C':'D';
+  return{score:s,grade:g,issues:iss};
+}
+function qtag(g){const c={A:'tag-green',B:'tag-blue',C:'tag-amber',D:'tag-red'}[g]||'tag-gray';return`<span class="tag ${c}">${g}</span>`;}
+function gcol(g){return{A:'var(--green)',B:'var(--blue)',C:'var(--amber)',D:'var(--red)'}[g]||'var(--text2)';}
+function mcrd(label,val,color,sub,icon){return`<div class="metric">${icon?`<div style="float:right;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:${color}22;color:${color}">${icon}</div>`:''}<div class="metric-label">${label}</div><div class="metric-val" style="color:${color||'var(--text)'}">${val}</div>${sub?`<div class="metric-sub">${sub}</div>`:''}</div>`;}
+function ph(t,s){return`<div class="page-header"><div class="page-title">${t}</div>${s?`<div class="page-sub">${s}</div>`:''}</div>`;}
+
+// ================================================================
+// LOGIN
+// ================================================================
+function pilihRole(role,el){
+  selectedRole=role;
+  document.querySelectorAll('.role-btn').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');
+  const sel=document.getElementById('login-name');
+  sel.innerHTML='<option value="">-- Pilih nama --</option>';
+  let names=[];
+  if(role==='sales')names=getSalesNames();
+  else if(role==='assman')names=getAssmanNames();
+  else if(role==='manager')names=getMgrNames();
+  else if(role==='gm')names=['GM'];
+  else if(role==='direktur')names=['Direktur Marketing'];
+  names.forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;sel.appendChild(o);});
+  document.getElementById('pw-section').style.display='none';
+  document.getElementById('notice-master').style.display='none';
+  document.getElementById('notice-err').style.display='none';
+}
+
+function onNameChange(){
+  const name=document.getElementById('login-name').value;
+  const pwSec=document.getElementById('pw-section');
+  const nm=document.getElementById('notice-master');
+  document.getElementById('notice-err').style.display='none';
+  if(!name){pwSec.style.display='none';nm.style.display='none';return;}
+  if(selectedRole==='manager'){
+    pwSec.style.display='none';nm.style.display='flex';
+    nm.innerHTML=`⚡ Master access — langsung masuk. Project: ${getMgrProjects(name).join(' & ')}`;
+  } else {
+    pwSec.style.display='block';nm.style.display='none';
+    document.getElementById('login-pw').value='';
+    document.getElementById('pw-label').textContent=selectedRole==='gm'?'Password GM':'Password';
+  }
+}
+
+function doLogin(){
+  const name=document.getElementById('login-name').value;
+  if(!name){alert('Pilih nama terlebih dahulu.');return;}
+  document.getElementById('notice-err').style.display='none';
+  if(selectedRole==='manager'){loginOK(selectedRole,name);return;}
+  const pw=document.getElementById('login-pw').value;
+  if(!pw){document.getElementById('notice-err').style.display='flex';return;}
+  const pwMap=passwords[selectedRole]||{};
+  if(pwMap[name]&&pw===pwMap[name])loginOK(selectedRole,name);
+  else document.getElementById('notice-err').style.display='flex';
+}
+
+async function loginOK(role,name){
+  currentRole=role;currentName=name;
+  document.getElementById('screen-login').classList.remove('active');
+  document.getElementById('app').style.display='flex';
+  const rc=ROLE_COLORS[role]||{bg:'#6C63FF',t:'#fff'};
+  const av=document.getElementById('sb-av');
+  av.textContent=name.charAt(0);
+  av.style.cssText=`width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;margin-bottom:10px;background:${rc.bg};color:${rc.t}`;
+  document.getElementById('sb-name').textContent=name;
+  document.getElementById('sb-role-txt').textContent=ROLE_LABEL[role];
+  document.getElementById('sb-master').style.display=(role==='gm'||role==='manager')?'inline-flex':'none';
+  // Tampilkan nama assman untuk sales
+  if(role==='sales'){
+    const assNama=getAssmanOfSales(name);
+    const assURL=getScriptURL(assNama);
+    const badge=document.getElementById('sb-sheet-status');
+    badge.style.display='inline-flex';
+    if(assURL){badge.className='sb-sheet';badge.textContent='🟢 Sheet '+assNama;}
+    else{badge.className='sb-sheet sb-sheet-off';badge.textContent='🔴 URL belum diset ('+assNama+')';}
+  }
+  buildNav();
+
+  // Tampilkan status sheet
+  const sheetBadge=document.getElementById('sb-sheet-status');
+  sheetBadge.style.display='inline-flex';
+
+  if(role==='sales'){
+    const ass=getAssmanOfSales(name);
+    const url=getScriptURL(ass);
+    if(url){sheetBadge.className='sb-sheet';sheetBadge.textContent='🟢 Sheet '+ass;}
+    else{sheetBadge.className='sb-sheet sb-sheet-off';sheetBadge.textContent='🔴 URL belum diset';}
+  } else if(role==='assman'){
+    const url=getScriptURL(name);
+    if(url){sheetBadge.className='sb-sheet';sheetBadge.textContent='🟢 Sheet terhubung';}
+    else{sheetBadge.className='sb-sheet sb-sheet-off';sheetBadge.textContent='🔴 URL belum diset';}
+  } else {
+    sheetBadge.className='sb-sheet';sheetBadge.textContent='🟢 Master access';
+  }
+
+  await fetchMyData();
+  goFirst();
+}
+
+function doLogout(){
+  document.getElementById('app').style.display='none';
+  document.getElementById('screen-login').classList.add('active');
+  document.getElementById('login-name').selectedIndex=0;
+  ['pw-section','notice-master','notice-err'].forEach(id=>document.getElementById(id).style.display='none');
+  const el=document.getElementById('login-pw');if(el)el.value='';
+  document.querySelectorAll('.role-btn').forEach(b=>b.classList.remove('selected'));
+  document.querySelector('.role-btn').classList.add('selected');
+  selectedRole='sales';pilihRole('sales',document.querySelector('.role-btn'));
+  Object.values(chartInstances).forEach(c=>{try{c.destroy();}catch(e){}});chartInstances={};
+}
+
+function buildNav(){
+  const defs={
+    sales:[{id:'s-dash',icon:'ti-layout-dashboard',label:'Dashboard'},{id:'s-add',icon:'ti-plus',label:'Input Prospek'},{id:'s-fu',icon:'ti-calendar-check',label:'Follow Up'}],
+    assman:[{id:'a-dash',icon:'ti-layout-dashboard',label:'Dashboard'},{id:'a-db',icon:'ti-users',label:'Database Tim'},{id:'a-quality',icon:'ti-star',label:'Kualitas Data'},{id:'a-lap',icon:'ti-send',label:'Laporan ke Manager'}],
+    manager:[{id:'m-dash',icon:'ti-layout-dashboard',label:'Dashboard'},{id:'m-db',icon:'ti-users',label:'Database'},{id:'m-quality',icon:'ti-star',label:'Kualitas Data'},{id:'m-lap',icon:'ti-mail',label:'Laporan Masuk'}],
+    gm:[{id:'g-dash',icon:'ti-layout-dashboard',label:'Dashboard'},{id:'g-db',icon:'ti-users',label:'Database Semua'},{id:'g-quality',icon:'ti-star',label:'Kualitas Database'},{id:'g-lap',icon:'ti-mail',label:'Laporan Masuk'},{id:'g-tim',icon:'ti-sitemap',label:'Manajemen Tim'},{id:'g-url',icon:'ti-link',label:'Kelola URL Sheet'},{id:'g-admin',icon:'ti-shield-lock',label:'Admin Password'}],
+    direktur:[{id:'d-dash',icon:'ti-layout-dashboard',label:'Overview'},{id:'d-db',icon:'ti-users',label:'Database'},{id:'d-analisa',icon:'ti-chart-bar',label:'Analisa Data'},{id:'d-quality',icon:'ti-star',label:'Kualitas Data'}]
+  };
+  const items=defs[currentRole]||[];
+  document.getElementById('sidebar-nav').innerHTML=`<div class="nav-section">Menu</div>`+items.map(it=>`<div class="nav-item" id="nav-${it.id}" onclick="goPage('${it.id}')"><i class="ti ${it.icon}"></i>${it.label}</div>`).join('');
+}
+
+function goFirst(){const f={sales:'s-dash',assman:'a-dash',manager:'m-dash',gm:'g-dash',direktur:'d-dash'};goPage(f[currentRole]);}
+function goPage(pid){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const el=document.getElementById('nav-'+pid);if(el)el.classList.add('active');
+  document.getElementById('main').innerHTML='';
+  Object.values(chartInstances).forEach(c=>{try{c.destroy();}catch(e){}});chartInstances={};
+  const B={
+    's-dash':pgSD,'s-add':pgSA,'s-fu':()=>pgSFU(),
+    'a-dash':pgAD,'a-db':pgADB,'a-quality':()=>pgQ(getMySheetData()),'a-lap':pgAL,
+    'm-dash':pgMD,'m-db':pgMDB,'m-quality':()=>pgQ(getMySheetData()),'m-lap':pgML,
+    'g-dash':pgGD,'g-db':pgGDB,'g-analisa':()=>pgAnalisa(getAllSheetData()),'g-quality':()=>pgQ(getAllSheetData()),'g-lap':pgGL,'g-tim':pgTim,'g-url':pgURL,'g-admin':pgAdmin,
+    'd-dash':pgDD,'d-db':pgDDB,'d-analisa':()=>pgAnalisa(getAllSheetData()),'d-quality':()=>pgQ(getAllSheetData())
+  };
+  if(B[pid]){const r=B[pid]();if(r&&r.then)r.catch(e=>console.error(e));}
+}
+
+// ================================================================
+// HALAMAN KELOLA URL SHEET (khusus GM)
+// ================================================================
+function pgURL(){
+  const assL=getAssmanNames();
+  document.getElementById('main').innerHTML=`${ph('Kelola URL Sheet per Assman','Daftarkan URL Apps Script dari sheet masing-masing assman')}
+  <div class="notice notice-blue" style="display:flex;margin-bottom:1rem">
+    <i class="ti ti-info-circle" style="flex-shrink:0;margin-top:1px"></i>
+    <div>Setiap assman perlu: (1) Paste <code style="background:var(--bg3);padding:1px 5px;border-radius:3px;font-size:11px">CRM_AppScript_PerAssman.gs</code> ke sheet mereka, (2) Deploy sebagai Web App, (3) Copy URL ke sini.</div>
+  </div>
+  <div class="card">
+    <div class="card-title">URL Script per Assman</div>
+    ${assL.map(a=>{
+      const url=getScriptURL(a);
+      const m=(team.members||[]).find(x=>x.role==='assman'&&x.nama===a);
+      return`<div style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <div style="width:32px;height:32px;border-radius:8px;background:#3B82F622;color:#3B82F6;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0">${a.charAt(0)}</div>
+          <div>
+            <div style="font-size:13px;font-weight:600">${a} <span class="tag tag-accent" style="font-size:10px">${m?m.project:''}</span></div>
+            <div style="font-size:11px;color:var(--text2);margin-top:2px">Sheet: ${a}'s Database</div>
+          </div>
+          <div style="margin-left:auto">${url?'<span class="tag tag-green" style="font-size:10px">✓ Terhubung</span>':'<span class="tag tag-amber" style="font-size:10px">⚠ Belum diset</span>'}</div>
+        </div>
+        <div class="url-input-wrap">
+          <input type="text" id="url-${a.replace(/\s/g,'_')}" value="${url||''}" placeholder="https://script.google.com/macros/s/.../exec" style="font-family:monospace;font-size:11px">
+          <button class="btn btn-primary btn-sm" onclick="simpanURL('${a}')">Simpan</button>
+          ${url?`<button class="btn btn-sm" onclick="testURL('${a}')"><i class="ti ti-plug"></i> Test</button>`:''}
+        </div>
+        <div id="url-result-${a.replace(/\s/g,'_')}" style="font-size:12px;margin-top:6px;display:none"></div>
+      </div>`;
+    }).join('')}
+    <div id="url-ok" class="notice notice-green" style="margin-top:8px;display:none"></div>
+  </div>`;
+}
+
+function simpanURL(assmanNama){
+  const key=assmanNama.replace(/\s/g,'_');
+  const url=document.getElementById('url-'+key).value.trim();
+  if(url&&!url.startsWith('https://script.google.com')){alert('URL tidak valid. Harus dimulai dengan https://script.google.com');return;}
+  assmanURLs[assmanNama]=url;save();
+  const ok=document.getElementById('url-ok');
+  ok.style.display='flex';ok.innerHTML=`✅ URL ${assmanNama} berhasil disimpan!`;
+  setTimeout(()=>{ok.style.display='none';pgURL();},2000);
+}
+
+async function testURL(assmanNama){
+  const key=assmanNama.replace(/\s/g,'_');
+  const res=document.getElementById('url-result-'+key);
+  res.style.display='block';res.style.color='var(--text2)';res.textContent='⏳ Menguji koneksi...';
+  const result=await fetchAssmanData(assmanNama);
+  if(result.length>=0){
+    res.style.color='var(--green)';
+    res.textContent=`✅ Berhasil terhubung! ${result.length} data ditemukan di sheet ${assmanNama}.`;
+  } else {
+    res.style.color='var(--red)';res.textContent='❌ Gagal terhubung. Cek URL dan pastikan script sudah di-deploy.';
+  }
+}
+
+// ================================================================
+// SALES — INPUT PROSPEK
+// ================================================================
+async function pgSD(){
+  const ass2=getAssmanOfSales(currentName);
+  // Cache-first: hanya await jika cache kosong
+  if(ass2&&getScriptURL(ass2)){
+    if(!sheetCache[ass2]||sheetCache[ass2].length===0){
+      await fetchAssmanData(ass2);
+    } else {
+      // Sync background — tidak blocking
+      fetchAssmanData(ass2).catch(()=>{});
+    }
+  }
+  const data=getMySheetData();
+  const ass=getAssmanOfSales(currentName);
+  const urlOK=!!getScriptURL(ass);
+  const sq=data.map(r=>scoreP(r));const aq=sq.length?Math.round(sq.reduce((a,b)=>a+b.score,0)/sq.length):0;
+  const today=todayISO();
+  const fuHariIni=data.filter(r=>r['Jadwal FU']&&r['Jadwal FU']<=today&&r['Status Konsumen']==='Masih bisa di FU');
+  const tertarik=data.filter(r=>r['Status Konsumen']==='Tertarik'||r['Status Konsumen']==='Masih bisa di FU');
+  document.getElementById('main').innerHTML=`${ph('Dashboard Saya','Selamat datang, '+currentName)}
+  ${!urlOK?`<div class="notice notice-amber" style="display:flex;margin-bottom:1rem"><i class="ti ti-alert-triangle" style="flex-shrink:0"></i> Sheet belum terhubung. Hubungi GM.</div>`:''}
+  <div class="grid4">
+    ${mcrd('Prospek Saya',data.length,'var(--accent)','','👤')}
+    ${mcrd('Tertarik',tertarik.length,'var(--amber)','','🔥')}
+    ${mcrd('Follow Up Hari Ini',fuHariIni.length,'var(--blue)','','📅')}
+    ${mcrd('Kualitas Data',aq+'%',aq>=70?'var(--green)':aq>=50?'var(--amber)':'var(--red)','','⭐')}
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Jadwal Hari Ini</div>
+      ${fuHariIni.length?fuHariIni.map(r=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+          <div>
+            <div style="font-size:13px;font-weight:700">${r['Nama Konsumen']||'—'}</div>
+            <div style="font-size:11px;color:var(--text2);margin-top:2px">${r['Minat Unit']||'—'} · ${r['Kontak Konsumen']||''}</div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center">
+            ${stag(r['Status Konsumen'])}
+            <button class="btn btn-sm btn-primary" onclick="goPage('s-fu')">Input</button>
+          </div>
+        </div>`).join(''):'<div class="empty" style="padding:1.5rem">Tidak ada jadwal hari ini 🎉</div>'}
+    </div>
+    <div class="card">
+      <div class="card-title">Prospek Saya</div>
+      <table><thead><tr><th>Nama</th><th>Project</th><th>Status</th><th>Grade</th></tr></thead>
+      <tbody>${data.map(r=>{const qr=scoreP(r);return`<tr>
+        <td style="font-weight:600">${r['Nama Konsumen']||'—'}</td>
+        <td style="font-size:12px;color:var(--text2)">${r['Minat Unit']||'—'}</td>
+        <td>${stag(r['Status Konsumen'])}</td>
+        <td>${qtag(qr.grade)}</td>
+      </tr>`;}).join('')||'<tr><td colspan="4" class="empty">Belum ada data</td></tr>'}</tbody></table>
+    </div>
+  </div>
+  <button class="btn btn-primary" onclick="refreshAndGo('s-dash')"><i class="ti ti-refresh"></i> Refresh dari Sheet</button>`;
+}
+
+function pgSA(){
+  const ass=getAssmanOfSales(currentName);
+  const urlOK=!!getScriptURL(ass);
+  document.getElementById('main').innerHTML=`${ph('Input Prospek Baru','Data langsung masuk ke sheet Assman '+ass)}
+  ${!urlOK?`<div class="notice notice-red" style="display:flex;margin-bottom:1rem"><i class="ti ti-x"></i> Sheet belum terhubung! Hubungi GM untuk set URL sheet Assman ${ass}.</div>`:''}
+  <div class="card">
+    <div id="n-dup" class="notice notice-amber" style="margin-bottom:10px"></div>
+    <div id="n-dup2" class="notice notice-purple" style="margin-bottom:10px"></div>
+    <div id="n-hp" class="notice notice-red" style="margin-bottom:10px"></div>
+    <div id="n-ok" class="notice notice-green" style="margin-bottom:10px"></div>
+    <div id="n-err" class="notice notice-red" style="margin-bottom:10px"></div>
+    <div class="form-row">
+      <div class="field"><label>Nama Konsumen *</label><input type="text" id="f-nama" placeholder="Nama lengkap konsumen"></div>
+      <div class="field"><label>Kontak Konsumen * <span id="hp-badge"></span></label>
+        <input type="text" id="f-kontak" placeholder="08xx-xxxx-xxxx" oninput="cekHP()" maxlength="16">
+        <div id="hp-detail" style="font-size:11px;color:var(--text3);margin-top:3px"></div>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="field"><label>Sumber Konsumen *</label>
+        <select id="f-sumber">
+          <option value="">-- Pilih --</option>
+          <option>Referral</option><option>Pameran di Ewalk</option><option>Pameran di Pentacity</option>
+          <option>Walk-in</option><option>Instagram / Facebook</option><option>Marketplace</option>
+          <option>Website</option><option>WhatsApp Blast</option><option>Cold Call</option>
+        </select>
+      </div>
+      <div class="field"><label>Minat Unit</label>
+        <select id="f-minat">
+          <option value="">-- Pilih --</option>
+          <option>Aeropolis</option><option>Nicopolis</option><option>Neopolis</option><option>Acropolis</option>
+          <option>Green Valley</option><option>Sepinggan Terrace</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="field"><label>Domisili Konsumen</label><input type="text" id="f-dom" placeholder="Kota / Kecamatan"></div>
+      <div class="field"><label>Rentang Usia</label>
+        <select id="f-usia">
+          <option value="">-- Pilih --</option>
+          <option>Di bawah 25 tahun</option><option>25-35 tahun</option><option>36-45 tahun</option>
+          <option>46-55 tahun</option><option>Di atas 55 tahun</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="field"><label>Tujuan Pembelian</label>
+        <select id="f-tujuan"><option value="">-- Pilih --</option><option>Hunian pribadi</option><option>Investasi</option><option>Keduanya</option></select>
+      </div>
+      <div class="field"><label>Status Konsumen</label>
+        <select id="f-status"><option value="Masih bisa di FU">Masih bisa di FU</option><option value="Tidak bisa di FU">Tidak bisa di FU</option><option value="Tidak minat apt">Tidak minat apt</option><option value="Non prospek">Non prospek</option></select>
+      </div>
+    </div>
+    <div class="field"><label>Keterangan</label><textarea id="f-ket" placeholder="Hasil percakapan, respons konsumen, rencana follow up..."></textarea></div>
+    <div class="form-row">
+      <div class="field"><label>📅 Jadwal Follow Up Berikutnya</label><input type="date" id="f-jadwal"></div>
+      <div class="field"><label>Keterangan tambahan</label><input type="text" id="f-ket2" placeholder="Fu kembali / Fu lewat WA / dll"></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+      <button class="btn" onclick="resetForm()">Reset</button>
+      <button class="btn btn-primary" id="btn-simpan" onclick="simpanProspek()" ${!urlOK?'disabled style="opacity:0.5"':''}>📤 Simpan ke Sheet ${ass}</button>
+    </div>
+  </div>`;
+}
+
+function normK(hp){return String(hp||'').replace(/[\s\-\.]/g,'');}
+
+function cekHP(){
+  const hp=document.getElementById('f-kontak').value;
+  const badge=document.getElementById('hp-badge');
+  const detail=document.getElementById('hp-detail');
+  const btn=document.getElementById('btn-simpan');
+  ['n-dup','n-dup2','n-hp'].forEach(id=>{const e=document.getElementById(id);if(e){e.style.display='none';e.style.background='';e.style.borderColor='';e.style.color='';}});
+  if(!hp){badge.innerHTML='';detail.textContent='';if(btn){btn.disabled=false;btn.style.opacity='1';}return;}
+  const v=validateHP(hp);
+  if(!v.valid){
+    badge.innerHTML='<span class="tag tag-red" style="font-size:10px">✗ Tidak valid</span>';
+    detail.textContent=v.reason;detail.style.color='var(--red)';
+    const nHP=document.getElementById('n-hp');
+    nHP.style.display='flex';nHP.innerHTML=`🚫 ${v.reason}`;
+    if(btn){btn.disabled=true;btn.style.opacity='0.4';}
+    return;
+  }
+  badge.innerHTML='<span class="tag tag-green" style="font-size:10px">✓ Valid</span>';
+  detail.textContent='Format valid';detail.style.color='var(--green)';
+
+  const ass=getAssmanOfSales(currentName);
+  const allAssData=getSheetData(ass);
+  const myData=allAssData.filter(r=>r['Nama Sales Executives']===currentName);
+  const cleanNew=normK(v.clean);
+
+  // Cek duplikat dari sales yang SAMA — BLOKIR
+  const dupMe=myData.find(r=>normK(String(r['Kontak Konsumen']||''))===cleanNew);
+  // Cek duplikat dari sales LAIN di assman yang sama — peringatan saja
+  const dupOther=allAssData.filter(r=>r['Nama Sales Executives']!==currentName&&normK(String(r['Kontak Konsumen']||''))===cleanNew);
+
+  if(dupMe){
+    const nDup=document.getElementById('n-dup');
+    nDup.style.display='flex';
+    nDup.style.background='var(--red-bg)';
+    nDup.style.borderColor='rgba(239,68,68,0.5)';
+    nDup.style.color='var(--red)';
+    nDup.innerHTML=`🚫 <strong>DUPLIKAT!</strong> Nomor ini sudah Anda input atas nama <strong>${dupMe['Nama Konsumen']}</strong>. Tidak bisa disimpan lagi.`;
+    if(btn){btn.disabled=true;btn.style.opacity='0.4';}
+  } else {
+    if(btn){btn.disabled=false;btn.style.opacity='1';}
+    if(dupOther.length){
+      const nDup2=document.getElementById('n-dup2');
+      nDup2.style.display='flex';
+      nDup2.innerHTML=`ℹ️ Nomor ini juga ada di sales lain: ${dupOther.map(r=>`<strong>${r['Nama Konsumen']}</strong> (${r['Nama Sales Executives']})`).join(', ')} — Anda tetap bisa simpan.`;
+    }
+  }
+}
+
+async function simpanProspek(){
+  const nama=document.getElementById('f-nama').value.trim();
+  const kontak=document.getElementById('f-kontak').value.trim();
+  const sumber=document.getElementById('f-sumber').value;
+  if(!nama||!kontak||!sumber){alert('Lengkapi field wajib: Nama, Kontak, Sumber.');return;}
+  const v=validateHP(kontak);
+  if(!v.valid){alert('Nomor tidak valid: '+v.reason);return;}
+  const ass=getAssmanOfSales(currentName);
+  const allAssData=getSheetData(ass);
+  const myData=allAssData.filter(r=>r['Nama Sales Executives']===currentName);
+  // Double-check duplikat saat simpan — layer pertahanan kedua
+  if(myData.find(r=>normK(String(r['Kontak Konsumen']||''))===normK(v.clean))){
+    alert('🚫 DUPLIKAT! Nomor ini sudah pernah Anda input. Tidak bisa disimpan.');return;
+  }
+  const btn=document.getElementById('btn-simpan');
+  btn.innerHTML='<span class="spinner"></span>Menyimpan...';btn.disabled=true;
+  const result=await callSheet(ass,'addProspek',{
+    namaSales:currentName,namaKonsumen:nama,kontakKonsumen:kontak,
+    sumberKonsumen:sumber,statusKonsumen:document.getElementById('f-status').value,
+    minatUnit:document.getElementById('f-minat').value,
+    keterangan:document.getElementById('f-ket').value,
+    jadwalFU:document.getElementById('f-jadwal')?document.getElementById('f-jadwal').value:'',
+    domisili:document.getElementById('f-dom').value,
+    rentangUsia:document.getElementById('f-usia').value,
+    penghasilan:document.getElementById('f-penghasilan')?document.getElementById('f-penghasilan').value:'',
+    tujuanPembelian:document.getElementById('f-tujuan').value,
+    keterangan2:document.getElementById('f-ket2').value,
+  });
+  btn.innerHTML=`📤 Simpan ke Sheet ${ass}`;btn.disabled=false;
+  if(result.success){
+    document.getElementById('n-ok').style.display='flex';
+    document.getElementById('n-ok').innerHTML=`✅ ${result.message} (baris ${result.rowAdded})`;
+    setTimeout(()=>document.getElementById('n-ok').style.display='none',5000);
+    resetForm();await fetchAssmanData(ass);
+  } else {
+    document.getElementById('n-err').style.display='flex';
+    document.getElementById('n-err').innerHTML='❌ '+result.message;
+  }
+}
+
+function resetForm(){
+  ['f-nama','f-kontak','f-dom','f-ket','f-ket2','f-jadwal'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  ['f-sumber','f-minat','f-usia','f-penghasilan','f-tujuan'].forEach(id=>{const e=document.getElementById(id);if(e)e.selectedIndex=0;});
+  document.getElementById('f-status').selectedIndex=0;
+  ['hp-badge','hp-detail'].forEach(id=>{const e=document.getElementById(id);if(e){e.innerHTML='';e.textContent='';}});
+  ['n-dup','n-dup2','n-hp','n-err'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='none';});
+}
+
+async function pgSFU(){
+  const ass=getAssmanOfSales(currentName);
+  const scriptURL=getScriptURL(ass);
+  const sudahAdaCache=sheetCache[ass]&&sheetCache[ass].length>0;
+
+  // Render struktur halaman dulu
+  document.getElementById('main').innerHTML=`${ph('Follow Up Saya','Update status & jadwal follow up prospek Anda')}
+  ${!scriptURL?`<div class="notice notice-red" style="display:flex;margin-bottom:1rem">
+    <i class="ti ti-plug-off" style="flex-shrink:0;margin-top:1px"></i>
+    <div>URL Sheet Assman <strong>${ass}</strong> belum terdaftar. Hubungi GM untuk mendaftarkan URL di menu "Kelola URL Sheet".</div>
+  </div>`:''}
+  <div class="chip-group">
+    <div class="chip active" onclick="sfF(this,'')">Semua</div>
+    <div class="chip" onclick="sfF(this,'Masih bisa di FU')">Masih bisa di FU</div>
+    <div class="chip" onclick="sfF(this,'Tertarik')">Tertarik</div>
+    <div class="chip" onclick="sfF(this,'Pending')">Pending</div>
+    <div class="chip" onclick="sfF(this,'Tidak bisa di FU')">Tidak bisa di FU</div>
+  </div>
+  <div id="sfu-list"></div>
+  <div id="sfu-sync" style="font-size:12px;color:var(--text2);margin-top:8px;display:none;align-items:center;gap:6px">
+    <span class="spinner" style="border-color:rgba(108,99,255,0.3);border-top-color:var(--accent);width:12px;height:12px;border-width:1.5px"></span> Menyinkronkan data terbaru...
+  </div>
+  <div id="sfu-err" class="notice notice-red" style="display:none;margin-top:8px"></div>
+  <button class="btn btn-primary" style="margin-top:0.75rem" onclick="refreshAndGo('s-fu')"><i class="ti ti-refresh"></i> Refresh dari Sheet</button>`;
+
+  if(!scriptURL){
+    document.getElementById('sfu-list').innerHTML='<div class="empty">Sheet belum terhubung. Hubungi GM. 🔌</div>';
+    return;
+  }
+
+  if(sudahAdaCache){
+    // Tampilkan cache dulu — langsung tanpa tunggu
+    rSFU('');
+    // Fetch di background
+    const syncEl=document.getElementById('sfu-sync');
+    if(syncEl)syncEl.style.display='flex';
+    fetchAssmanData(ass).then(()=>{
+      if(syncEl)syncEl.style.display='none';
+      rSFU('');
+    }).catch(err=>{
+      if(syncEl)syncEl.style.display='none';
+      const errEl=document.getElementById('sfu-err');
+      if(errEl){errEl.style.display='flex';errEl.innerHTML='⚠ Gagal sync: '+err.message;}
+    });
+  } else {
+    // Belum ada cache sama sekali — fetch dulu
+    document.getElementById('sfu-list').innerHTML=`<div style="text-align:center;padding:2rem;color:var(--text2)">
+      <span class="spinner" style="border-color:rgba(108,99,255,0.3);border-top-color:var(--accent)"></span>
+      <div style="margin-top:8px">Mengambil data dari Sheet ${ass}...</div>
+    </div>`;
+    const result=await fetchAssmanData(ass);
+    if(!result||result.length===0){
+      const errEl=document.getElementById('sfu-err');
+      if(errEl){
+        errEl.style.display='flex';
+        errEl.innerHTML=`⚠ Tidak ada data atau gagal terhubung ke sheet <strong>${ass}</strong>. Pastikan Apps Script sudah di-deploy dan URL sudah terdaftar.`;
+      }
+    }
+    rSFU('');
+  }
+}
+function sfF(el,v){document.querySelectorAll('#main .chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');rSFU(v);}
+function rSFU(st){
+  const today=todayISO();
+  let data=getMySheetData();
+  if(st)data=data.filter(r=>r['Status Konsumen']===st);
+  data.sort((a,b)=>{
+    const ta=a['Jadwal FU']||'9999';const tb=b['Jadwal FU']||'9999';
+    return ta.localeCompare(tb);
+  });
+  document.getElementById('sfu-list').innerHTML=data.length?data.slice(0,50).map((r,i)=>{
+    const tgl=r['Jadwal FU']||'';
+    const isLate=tgl&&tgl<today;const isToday=tgl===today;const isSoon=isDueSoon(tgl)&&tgl>today;
+    const borderColor=isLate||isToday?'rgba(239,68,68,0.5)':isSoon?'rgba(168,85,247,0.4)':'var(--border)';
+    return`<div class="fu-card" style="border-color:${borderColor};margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+        <div>
+          <div style="font-size:15px;font-weight:700">${r['Nama Konsumen']||'—'} <span style="font-weight:400;font-size:12px;color:var(--text2)">${r['Kontak Konsumen']||''}</span></div>
+          <div style="font-size:12px;color:var(--text2);margin-top:3px">${r['Minat Unit']||'—'} · ${r['Sumber Konsumen']||'—'}</div>
+          ${tgl?`<div style="margin-top:5px;display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;background:${isLate||isToday?'var(--red-bg)':isSoon?'var(--purple-bg)':'var(--bg3)'};border:1px solid ${isLate||isToday?'rgba(239,68,68,0.3)':isSoon?'rgba(168,85,247,0.3)':'var(--border)'}">
+            <span style="font-size:11px;font-weight:600;color:${isLate?'var(--red)':isToday?'var(--amber)':isSoon?'var(--purple)':'var(--text2)'}">
+              📅 ${formatTgl(tgl)} ${isLate?'— ⚠ TERLEWAT':isToday?'— 🔔 HARI INI':isSoon?'— ⏰ SEGERA':''}
+            </span>
+          </div>`:''}
+        </div>
+        <div style="flex-shrink:0;margin-left:8px">${stag(r['Status Konsumen'])}</div>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:12px">
+        <div class="form-row" style="margin-bottom:10px">
+          <div class="field">
+            <label style="font-size:12px;color:var(--text2);margin-bottom:4px;display:block">Status</label>
+            <select id="fu-status-${i}" style="font-size:13px">
+              <option value="Masih bisa di FU" ${(r['Status Konsumen']||'')==='Masih bisa di FU'?'selected':''}>Masih bisa di FU</option>
+              <option value="Tertarik" ${(r['Status Konsumen']||'')==='Tertarik'?'selected':''}>Tertarik</option>
+              <option value="Pending" ${(r['Status Konsumen']||'')==='Pending'?'selected':''}>Pending</option>
+              <option value="Tidak bisa di FU" ${(r['Status Konsumen']||'')==='Tidak bisa di FU'?'selected':''}>Tidak bisa di FU</option>
+              <option value="Tidak minat apt" ${(r['Status Konsumen']||'')==='Tidak minat apt'?'selected':''}>Tidak minat apt</option>
+              <option value="Non prospek" ${(r['Status Konsumen']||'')==='Non prospek'?'selected':''}>Non prospek</option>
+            </select>
+          </div>
+          <div class="field">
+            <label style="font-size:12px;color:var(--text2);margin-bottom:4px;display:block">Jadwal berikutnya</label>
+            <input type="date" id="fu-jadwal-${i}" value="${tgl}" style="font-size:13px">
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:10px">
+          <label style="font-size:12px;color:var(--text2);margin-bottom:4px;display:block">Dokumen</label>
+          <input type="text" id="fu-dok-${i}" value="${r['Dokumen']||r['Keterangan2']||''}" placeholder="Brosur, simulasi harga, SPK..." style="font-size:13px">
+        </div>
+        <div class="field" style="margin-bottom:12px">
+          <label style="font-size:12px;color:var(--text2);margin-bottom:4px;display:block">Catatan follow up</label>
+          <textarea id="fu-ket-${i}" placeholder="Respons konsumen, keberatan, komitmen, langkah berikutnya..." style="font-size:13px;height:80px;resize:vertical">${r['Keterangan']||''}</textarea>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn btn-primary" onclick="updateFU(${i},'${(String(r['Kontak Konsumen']||'')).replace(/'/g,"\'")}')">💾 Simpan</button>
+          <div id="fu-ok-${i}" class="notice notice-green" style="flex:1;margin:0;display:none;padding:6px 12px">✅ Tersimpan!</div>
+          <div id="fu-err-${i}" class="notice notice-red" style="flex:1;margin:0;display:none;padding:6px 12px"></div>
+        </div>
+      </div>
+    </div>`;}).join(''):'<div class="empty">Tidak ada data 📭</div>';
+}
+
+async function updateFU(i, kontak){
+  const jadwal=document.getElementById('fu-jadwal-'+i).value;
+  const status=document.getElementById('fu-status-'+i).value;
+  const ket=document.getElementById('fu-ket-'+i).value;
+  const dok=document.getElementById('fu-dok-'+i).value;
+  const ass=getAssmanOfSales(currentName);
+  const btn=document.querySelector(`[onclick="updateFU(${i},'${kontak.replace(/'/g,"\'")}")"]`);
+  // Update lokal cache
+  const idx=sheetCache[ass]?sheetCache[ass].findIndex(r=>normK(String(r['Kontak Konsumen']||''))===normK(kontak)&&r['Nama Sales Executives']===currentName):-1;
+  if(idx>=0){
+    sheetCache[ass][idx]['Jadwal FU']=jadwal;
+    sheetCache[ass][idx]['Status Konsumen']=status;
+    sheetCache[ass][idx]['Keterangan']=ket;
+    sheetCache[ass][idx]['Keterangan2']=dok;
+  }
+  // Kirim ke sheet
+  const result=await callSheet(ass,'updateProspek',{
+    kontakKonsumen:kontak,namaSales:currentName,
+    statusKonsumen:status,jadwalFU:jadwal,
+    keterangan:ket,dokumen:dok
+  });
+  const ok=document.getElementById('fu-ok-'+i);
+  const err=document.getElementById('fu-err-'+i);
+  if(result&&result.success){
+    if(ok){ok.style.display='flex';setTimeout(()=>ok.style.display='none',3000);}
+  } else {
+    if(err){err.style.display='flex';err.innerHTML='❌ '+(result?result.message:'Gagal simpan');setTimeout(()=>err.style.display='none',5000);}
+  }
+}
+
+// ================================================================
+// ASSMAN
+// ================================================================
+function pgAD(){
+  const data=getMySheetData();
+  const url=getScriptURL(currentName);
+  const sq=data.map(r=>scoreP(r));const aq=sq.length?Math.round(sq.reduce((a,b)=>a+b.score,0)/sq.length):0;
+  const salesList=getSalesByAssman(currentName).map(m=>m.nama);
+  document.getElementById('main').innerHTML=`${ph('Dashboard Assman — '+currentName,'Sheet: '+(url?'Terhubung ✅':'Belum diset ⚠️'))}
+  ${!url?`<div class="notice notice-amber" style="display:flex;margin-bottom:1rem"><i class="ti ti-alert-triangle"></i> URL sheet Anda belum didaftarkan oleh GM. Hubungi GM untuk mendaftarkan URL.</div>`:''}
+  <div class="grid4">
+    ${mcrd('Total Prospek Tim',data.length,'var(--accent)','','👥')}
+    ${mcrd('Masih FU',data.filter(r=>r['Status Konsumen']==='Masih bisa di FU').length,'var(--green)','','📞')}
+    ${mcrd('Tidak FU',data.filter(r=>r['Status Konsumen']==='Tidak bisa di FU').length,'var(--red)','','🚫')}
+    ${mcrd('Kualitas Data',aq+'%',aq>=70?'var(--green)':aq>=50?'var(--amber)':'var(--red)','','⭐')}
+  </div>
+  <div class="card"><div class="card-title">Performa per Sales</div>
+    <table><thead><tr><th>Sales</th><th>Total</th><th>Masih FU</th><th>Tidak FU</th><th>Grade DB</th></tr></thead>
+    <tbody>${salesList.map(s=>{
+      const sd=data.filter(r=>r['Nama Sales Executives']===s);
+      const sq2=sd.map(r=>scoreP(r));const ag=sq2.length?Math.round(sq2.reduce((a,b)=>a+b.score,0)/sq2.length):0;
+      const g=ag>=80?'A':ag>=60?'B':ag>=35?'C':'D';
+      return`<tr><td style="font-weight:600">${s}</td><td>${sd.length}</td>
+        <td><span class="tag tag-green">${sd.filter(r=>r['Status Konsumen']==='Masih bisa di FU').length}</span></td>
+        <td><span class="tag tag-red">${sd.filter(r=>r['Status Konsumen']==='Tidak bisa di FU').length}</span></td>
+        <td>${qtag(g)}</td></tr>`;}).join('')}
+    </tbody></table>
+  </div>
+  <button class="btn btn-primary" onclick="refreshAndGo('a-dash')"><i class="ti ti-refresh"></i> Refresh dari Sheet</button>`;
+}
+function pgADB(){
+  document.getElementById('main').innerHTML=`${ph('Database Tim')}
+  <div style="display:flex;gap:8px;margin-bottom:1rem"><input type="text" id="adb-q" placeholder="🔍 Cari..." oninput="rADB()" style="flex:1"></div>
+  <div class="chip-group"><div class="chip active" onclick="aDbF(this,'')">Semua</div><div class="chip" onclick="aDbF(this,'Masih bisa di FU')">Masih FU</div><div class="chip" onclick="aDbF(this,'Tidak bisa di FU')">Tidak FU</div></div>
+  <div class="card" style="padding:0;overflow:hidden"><div class="overflow-auto">
+  <table><thead><tr><th>Nama</th><th>Kontak</th><th>HP✓</th><th>Sumber</th><th>Minat</th><th>Status</th><th>Grade</th><th>Sales</th><th>Keterangan</th></tr></thead>
+  <tbody id="adb-body"></tbody></table></div></div>
+  <button class="btn btn-primary" style="margin-top:1rem" onclick="refreshAndGo('a-db')"><i class="ti ti-refresh"></i> Refresh</button>`;
+  rADB();
+}
+let aDbSt='';
+function aDbF(el,v){aDbSt=v;document.querySelectorAll('#main .chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');rADB();}
+function rADB(){
+  const q=(document.getElementById('adb-q')||{value:''}).value.toLowerCase();
+  const data=getMySheetData().filter(r=>(!q||(r['Nama Konsumen']||'').toLowerCase().includes(q)||(r['Kontak Konsumen']||'').includes(q))&&(!aDbSt||r['Status Konsumen']===aDbSt));
+  document.getElementById('adb-body').innerHTML=data.length?data.map(r=>{const qr=scoreP(r);const hpv=validateHP(String(r['Kontak Konsumen']||''));return`<tr>
+    <td style="font-weight:600">${r['Nama Konsumen']||'—'}</td><td style="font-size:12px;color:var(--text2)">${r['Kontak Konsumen']||'—'}</td>
+    <td>${hpv.valid?'<span class="tag tag-green" style="font-size:10px">✓</span>':'<span class="tag tag-red" style="font-size:10px">✗</span>'}</td>
+    <td style="font-size:12px">${r['Sumber Konsumen']||'—'}</td><td style="font-size:12px">${r['Minat Unit']||'—'}</td>
+    <td>${stag(r['Status Konsumen'])}</td><td>${qtag(qr.grade)}</td><td>${r['Nama Sales Executives']||'—'}</td>
+    <td style="font-size:12px;color:var(--text2);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r['Keterangan']||'—'}</td>
+  </tr>`;}).join(''):'<tr><td colspan="9" class="empty">Tidak ada data</td></tr>';
+}
+function pgAL(){
+  const myL=laporan.filter(x=>x.dari===currentName);
+  document.getElementById('main').innerHTML=`${ph('Laporan ke Manager')}
+  <div class="card"><div class="card-title">Buat laporan baru</div>
+    <div class="field"><label>Periode</label><select id="al-per"><option>Mingguan — Mei Minggu 2</option><option>Mingguan — Mei Minggu 1</option><option>Bulanan — April 2026</option></select></div>
+    <div class="field"><label>Ringkasan pencapaian *</label><textarea id="al-ring" placeholder="Total prospek, status FU, highlight minggu ini..."></textarea></div>
+    <div class="field"><label>Kendala</label><textarea id="al-ken" placeholder="Hambatan yang dihadapi..."></textarea></div>
+    <div class="field"><label>Rencana tindak lanjut</label><textarea id="al-rtl" placeholder="Langkah berikutnya..."></textarea></div>
+    <div id="al-ok" class="notice notice-green" style="margin-top:8px">✅ Laporan terkirim!</div>
+    <button class="btn btn-primary" style="margin-top:10px" onclick="kirimLap()">📤 Kirim ke Manager</button>
+  </div>
+  <div class="card"><div class="card-title">Riwayat laporan</div>
+    ${myL.length?[...myL].reverse().map(l=>`<div style="padding:10px 0;border-bottom:1px solid var(--border)"><div style="display:flex;justify-content:space-between"><span style="font-size:13px;font-weight:600">${l.periode}</span><span class="tag tag-green">Terkirim</span></div><div style="font-size:12px;color:var(--text2);margin-top:4px">${l.ringkasan.substring(0,80)}...</div></div>`).join(''):'<div class="empty">Belum ada laporan</div>'}
+  </div>`;
+}
+function kirimLap(){
+  const ring=document.getElementById('al-ring').value.trim();if(!ring){alert('Isi ringkasan.');return;}
+  const m=(team.members||[]).find(x=>x.role==='assman'&&x.nama===currentName);
+  const proj=m?m.project:'';
+  const mgrList=getByRole('manager').filter(mgr=>mgr.project.split(',').includes(proj));
+  const mgr=mgrList.length?mgrList[0].nama:'Manager';
+  laporan.push({dari:currentName,ke:mgr,periode:document.getElementById('al-per').value,ringkasan:ring,kendala:document.getElementById('al-ken').value,rtl:document.getElementById('al-rtl').value,waktu:new Date().toLocaleString('id-ID')});
+  save();document.getElementById('al-ok').style.display='flex';
+  setTimeout(()=>document.getElementById('al-ok').style.display='none',3000);
+  document.getElementById('al-ring').value='';document.getElementById('al-ken').value='';document.getElementById('al-rtl').value='';
+  setTimeout(pgAL,200);
+}
+
+// ================================================================
+// MANAGER
+// ================================================================
+function pgMD(){
+  const data=getMySheetData();
+  const sq=data.map(r=>scoreP(r));const aq=sq.length?Math.round(sq.reduce((a,b)=>a+b.score,0)/sq.length):0;
+  document.getElementById('main').innerHTML=`${ph('Dashboard Manager — '+currentName,'Master access')}
+  <div class="grid4">
+    ${mcrd('Total Prospek',data.length,'var(--accent)',getMgrProjects(currentName).join(' & '),'📊')}
+    ${mcrd('Masih FU',data.filter(r=>r['Status Konsumen']==='Masih bisa di FU').length,'var(--green)','','📞')}
+    ${mcrd('Tidak FU',data.filter(r=>r['Status Konsumen']==='Tidak bisa di FU').length,'var(--red)','','🚫')}
+    ${mcrd('Kualitas DB',aq+'%',aq>=70?'var(--green)':aq>=50?'var(--amber)':'var(--red)','','⭐')}
+  </div>
+  <div class="card"><div class="card-title">Per Assman</div>
+    <table><thead><tr><th>Assman</th><th>Project</th><th>Total</th><th>Masih FU</th><th>Grade DB</th><th>Sheet</th></tr></thead>
+    <tbody>${getAssmanForMgr(currentName).map(a=>{
+      const ad=getSheetData(a.nama);
+      const sq2=ad.map(r=>scoreP(r));const ag=sq2.length?Math.round(sq2.reduce((a,b)=>a+b.score,0)/sq2.length):0;
+      const g=ag>=80?'A':ag>=60?'B':ag>=35?'C':'D';
+      const urlOK=!!getScriptURL(a.nama);
+      return`<tr><td style="font-weight:600">${a.nama}</td><td><span class="tag tag-accent">${a.project}</span></td>
+        <td>${ad.length}</td>
+        <td><span class="tag tag-green">${ad.filter(r=>r['Status Konsumen']==='Masih bisa di FU').length}</span></td>
+        <td>${qtag(g)}</td>
+        <td>${urlOK?'<span class="tag tag-green" style="font-size:10px">✓ OK</span>':'<span class="tag tag-amber" style="font-size:10px">⚠ Belum</span>'}</td>
+      </tr>`;}).join('')}
+    </tbody></table>
+  </div>
+  <button class="btn btn-primary" onclick="refreshAndGo('m-dash')"><i class="ti ti-refresh"></i> Refresh dari Sheet</button>`;
+}
+function pgMDB(){
+  document.getElementById('main').innerHTML=`${ph('Database')}
+  <div style="display:flex;gap:8px;margin-bottom:1rem"><input type="text" id="mdb-q" placeholder="🔍 Cari..." oninput="rMDB()" style="flex:1"><select id="mdb-ass" onchange="rMDB()" style="font-size:13px"><option value="">Semua Assman</option>${getAssmanForMgr(currentName).map(a=>`<option>${a.nama}</option>`).join('')}</select></div>
+  <div class="card" style="padding:0;overflow:hidden"><div class="overflow-auto">
+  <table><thead><tr><th>Tanggal</th><th>Assman</th><th>Sales</th><th>Nama</th><th>Kontak</th><th>Sumber</th><th>Minat</th><th>Status</th><th>Grade</th></tr></thead>
+  <tbody id="mdb-body"></tbody></table></div></div>
+  <button class="btn btn-primary" style="margin-top:1rem" onclick="refreshAndGo('m-db')"><i class="ti ti-refresh"></i> Refresh</button>`;rMDB();
+}
+function rMDB(){
+  const q=(document.getElementById('mdb-q')||{value:''}).value.toLowerCase();
+  const fa=(document.getElementById('mdb-ass')||{value:''}).value;
+  const assL=getAssmanForMgr(currentName).filter(a=>!fa||a.nama===fa);
+  const rows=[];
+  assL.forEach(a=>{getSheetData(a.nama).filter(r=>!q||(r['Nama Konsumen']||'').toLowerCase().includes(q)||(r['Kontak Konsumen']||'').includes(q)||(r['Nama Sales Executives']||'').toLowerCase().includes(q)).forEach(r=>rows.push({...r,_assman:a.nama}));});
+  document.getElementById('mdb-body').innerHTML=rows.length?rows.map(r=>{const qr=scoreP(r);return`<tr>
+    <td style="font-size:11px;color:var(--text2)">${r['Tanggal']||'—'}</td><td style="font-size:12px">${r._assman}</td>
+    <td style="font-weight:600;font-size:12px">${r['Nama Sales Executives']||'—'}</td><td>${r['Nama Konsumen']||'—'}</td>
+    <td style="font-size:12px;color:var(--text2)">${r['Kontak Konsumen']||'—'}</td><td style="font-size:12px">${r['Sumber Konsumen']||'—'}</td>
+    <td style="font-size:12px">${r['Minat Unit']||'—'}</td><td>${stag(r['Status Konsumen'])}</td><td>${qtag(qr.grade)}</td>
+  </tr>`;}).join(''):'<tr><td colspan="9" class="empty">Tidak ada data</td></tr>';
+}
+function pgML(){
+  const assL=getAssmanForMgr(currentName).map(a=>a.nama);
+  const masuk=laporan.filter(x=>assL.includes(x.dari));
+  document.getElementById('main').innerHTML=`${ph('Laporan Masuk')}
+  ${masuk.length?[...masuk].reverse().map(l=>`<div class="card"><div style="display:flex;justify-content:space-between;margin-bottom:1rem"><div style="font-size:15px;font-weight:700">${l.dari}</div><span style="font-size:12px;color:var(--text2)">${l.periode}·${l.waktu}</span></div>
+    <div style="background:var(--bg3);border-radius:6px;padding:10px;margin-bottom:8px"><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Pencapaian</div><div style="font-size:13px">${l.ringkasan}</div></div>
+    <div style="background:var(--bg3);border-radius:6px;padding:10px"><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Kendala</div><div style="font-size:13px">${l.kendala||'-'}</div></div>
+  </div>`).join(''):'<div class="card"><div class="empty">Belum ada laporan masuk</div></div>'}`;
+}
+
+// ================================================================
+// GM
+// ================================================================
+function pgGD(){
+  const allData=getAllSheetData();
+  const sq=allData.map(r=>scoreP(r));const aq=sq.length?Math.round(sq.reduce((a,b)=>a+b.score,0)/sq.length):0;
+  const assL=getAssmanNames();const connectedAss=assL.filter(a=>getScriptURL(a));
+  document.getElementById('main').innerHTML=`${ph('Dashboard GM','Master access — semua project')}
+  ${connectedAss.length<assL.length?`<div class="notice notice-amber" style="display:flex;margin-bottom:1rem"><i class="ti ti-alert-triangle"></i> ${assL.length-connectedAss.length} assman belum punya URL sheet terdaftar. Daftarkan di menu "Kelola URL Sheet".</div>`:''}
+  <div class="grid4">
+    ${mcrd('Total Data',allData.length,'var(--accent)',connectedAss.length+'/'+assL.length+' assman terhubung','📊')}
+    ${mcrd('Masih FU',allData.filter(r=>r['Status Konsumen']==='Masih bisa di FU').length,'var(--green)','','📞')}
+    ${mcrd('Tidak FU',allData.filter(r=>r['Status Konsumen']==='Tidak bisa di FU').length,'var(--red)','','🚫')}
+    ${mcrd('Kualitas DB',aq+'%',aq>=70?'var(--green)':aq>=50?'var(--amber)':'var(--red)','rata-rata','⭐')}
+  </div>
+  <div class="grid2">
+    <div class="card"><div class="card-title">Status koneksi per Assman</div>
+      ${assL.map(a=>{const url=getScriptURL(a);const d=getSheetData(a);const m=(team.members||[]).find(x=>x.role==='assman'&&x.nama===a);return`<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">
+        <div style="width:28px;height:28px;border-radius:8px;background:#3B82F622;color:#3B82F6;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0">${a.charAt(0)}</div>
+        <div style="flex:1"><div style="font-size:13px;font-weight:600">${a} <span class="tag tag-accent" style="font-size:10px">${m?m.project:''}</span></div></div>
+        <div style="text-align:right"><div>${url?'<span class="tag tag-green" style="font-size:10px">✓ Terhubung</span>':'<span class="tag tag-amber" style="font-size:10px">⚠ Belum</span>'}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${d.length} data</div></div>
+      </div>`;}).join('')}
+    </div>
+    <div class="card"><div class="card-title">Laporan terbaru</div>
+      ${laporan.slice(-5).reverse().map(l=>`<div style="padding:7px 0;border-bottom:1px solid var(--border)"><div style="font-size:13px;font-weight:600">${l.dari} → ${l.ke}</div><div style="font-size:12px;color:var(--text2);margin-top:2px">${l.periode}</div></div>`).join('')||'<div class="empty">Belum ada laporan</div>'}
+    </div>
+  </div>
+  <button class="btn btn-primary" onclick="refreshAndGo('g-dash')"><i class="ti ti-refresh"></i> Refresh semua sheet</button>`;
+}
+
+function pgGDB(){
+  const allData=getAllSheetData();
+  document.getElementById('main').innerHTML=`${ph('Database Semua Sheet')}
+  <div style="display:flex;gap:8px;margin-bottom:1rem">
+    <input type="text" id="gdb-q" placeholder="🔍 Cari..." oninput="rGDB()" style="flex:1">
+    <select id="gdb-ass" onchange="rGDB()" style="font-size:13px"><option value="">Semua Assman</option>${getAssmanNames().filter(a=>getScriptURL(a)).map(a=>`<option>${a}</option>`).join('')}</select>
+    <select id="gdb-st" onchange="rGDB()" style="font-size:13px"><option value="">Semua status</option><option>Masih bisa di FU</option><option>Tidak bisa di FU</option><option>Non prospek</option></select>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden"><div class="overflow-auto">
+  <table><thead><tr><th>Tanggal</th><th>Assman</th><th>Sales</th><th>Nama</th><th>Kontak</th><th>HP✓</th><th>Sumber</th><th>Minat</th><th>Status</th><th>Grade</th></tr></thead>
+  <tbody id="gdb-body"></tbody></table></div></div>
+  <div id="gdb-info" style="font-size:12px;color:var(--text2);margin-top:8px"></div>
+  <button class="btn btn-primary" style="margin-top:1rem" onclick="refreshAndGo('g-db')"><i class="ti ti-refresh"></i> Refresh</button>`;
+  rGDB();
+}
+function rGDB(){
+  const q=(document.getElementById('gdb-q')||{value:''}).value.toLowerCase();
+  const fa=(document.getElementById('gdb-ass')||{value:''}).value;
+  const fst=(document.getElementById('gdb-st')||{value:''}).value;
+  const assL=getAssmanNames().filter(a=>getScriptURL(a)&&(!fa||a===fa));
+  const rows=[];
+  assL.forEach(a=>{getSheetData(a).filter(r=>(!q||(r['Nama Konsumen']||'').toLowerCase().includes(q)||(r['Kontak Konsumen']||'').includes(q))&&(!fst||r['Status Konsumen']===fst)).forEach(r=>rows.push({...r,_assman:a}));});
+  document.getElementById('gdb-body').innerHTML=rows.length?rows.map(r=>{const qr=scoreP(r);const hpv=validateHP(String(r['Kontak Konsumen']||''));return`<tr>
+    <td style="font-size:11px;color:var(--text2)">${r['Tanggal']||'—'}</td>
+    <td style="font-size:12px">${r._assman}</td>
+    <td style="font-weight:600;font-size:12px">${r['Nama Sales Executives']||'—'}</td>
+    <td>${r['Nama Konsumen']||'—'}</td>
+    <td style="font-size:12px;color:var(--text2)">${r['Kontak Konsumen']||'—'}</td>
+    <td>${hpv.valid?'<span class="tag tag-green" style="font-size:10px">✓</span>':'<span class="tag tag-red" style="font-size:10px">✗</span>'}</td>
+    <td style="font-size:12px">${r['Sumber Konsumen']||'—'}</td>
+    <td style="font-size:12px">${r['Minat Unit']||'—'}</td>
+    <td>${stag(r['Status Konsumen'])}</td>
+    <td>${qtag(qr.grade)}</td>
+  </tr>`;}).join(''):'<tr><td colspan="10" class="empty">Tidak ada data</td></tr>';
+  const info=document.getElementById('gdb-info');if(info)info.textContent=`Menampilkan ${rows.length} data`;
+}
+
+function pgGL(){
+  document.getElementById('main').innerHTML=`${ph('Laporan Masuk')}
+  <div style="display:flex;gap:8px;margin-bottom:1rem;align-items:center"><label style="font-size:12px;color:var(--text2)">Dari:</label>
+    <select id="gl-f" onchange="rGL()" style="font-size:13px"><option value="">Semua</option>${[...getAssmanNames(),...getMgrNames()].map(n=>`<option>${n}</option>`).join('')}</select>
+  </div><div id="gl-list"></div>`;rGL();
+}
+function rGL(){
+  const f=(document.getElementById('gl-f')||{value:''}).value;
+  const data=laporan.filter(x=>!f||x.dari===f);
+  document.getElementById('gl-list').innerHTML=data.length?[...data].reverse().map(l=>`<div class="card"><div style="display:flex;justify-content:space-between;margin-bottom:1rem"><div style="font-size:15px;font-weight:700">${l.dari} → ${l.ke}</div><span style="font-size:12px;color:var(--text2)">${l.periode}</span></div>
+    <div style="background:var(--bg3);border-radius:6px;padding:10px;margin-bottom:8px"><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Pencapaian</div><div style="font-size:13px">${l.ringkasan}</div></div>
+    <div style="background:var(--bg3);border-radius:6px;padding:10px"><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Kendala</div><div style="font-size:13px">${l.kendala||'-'}</div></div>
+  </div>`).join(''):'<div class="card"><div class="empty">Belum ada laporan</div></div>';
+}
+
+// ================================================================
+// KUALITAS DATABASE
+// ================================================================
+function pgQ(data){
+  const scored=data.map(r=>({...r,...scoreP(r)}));
+  const grades={A:0,B:0,C:0,D:0};scored.forEach(p=>grades[p.grade]++);
+  const avgS=scored.length?Math.round(scored.reduce((a,b)=>a+b.score,0)/scored.length):0;
+  const validHp=scored.filter(p=>validateHP(String(p['Kontak Konsumen']||'')).valid).length;
+  const hasKet=scored.filter(p=>String(p['Keterangan']||'').length>5).length;
+  const hasDom=scored.filter(p=>p['Domisili Konsumen']).length;
+  const hasTujuan=scored.filter(p=>p['Tujuan Pembelian Unit']).length;
+  document.getElementById('main').innerHTML=`${ph('Kualitas Database','Penilaian otomatis berdasarkan kelengkapan data')}
+  <div class="grid4">${mcrd('Rata-rata Skor',avgS+'%',avgS>=70?'var(--green)':avgS>=50?'var(--amber)':'var(--red)','','📊')}${mcrd('Kontak Valid',validHp+'/'+scored.length,'var(--blue)','','📱')}${mcrd('Keterangan Terisi',hasKet+'/'+scored.length,'var(--purple)','','📝')}${mcrd('Domisili Terisi',hasDom+'/'+scored.length,'var(--green)','','🏠')}</div>
+  <div class="grid2">
+    <div class="card"><div class="card-title">Distribusi Grade</div>
+      ${['A','B','C','D'].map(g=>{const cnt=grades[g];const prc=pct(cnt,scored.length||1);const cols={A:'var(--green)',B:'var(--blue)',C:'var(--amber)',D:'var(--red)'};return`<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><div style="width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;background:${cols[g]}22;color:${cols[g]};border:2px solid ${cols[g]};flex-shrink:0">${g}</div><div style="flex:1"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span style="font-weight:500">Grade ${g}</span><span style="color:var(--text2)">${cnt} (${prc}%)</span></div><div class="prog-wrap"><div class="prog-fill" style="width:${prc}%;background:${cols[g]}"></div></div></div></div>`;}).join('')}
+    </div>
+    <div class="card"><div class="card-title">Komponen penilaian</div>
+      ${[['📱 Kontak valid (25)',validHp],['🏠 Domisili (10)',hasDom],['🎯 Minat unit (10)',scored.filter(p=>p['Minat Unit']).length],['📝 Keterangan (20)',hasKet],['🛒 Tujuan beli (10)',hasTujuan],['📊 Usia (5)',scored.filter(p=>p['Rentang Usia Konsumen']||p['Rentang Usia Konsu']).length]].map(([l,v])=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px">${l}</span><span style="font-size:13px;color:var(--blue);font-weight:600">${v}/${scored.length}</span></div>`).join('')}
+    </div>
+  </div>
+  <div class="card"><div class="card-title">Prioritas perbaikan (Grade C & D)</div>
+    <div class="overflow-auto"><table><thead><tr><th>Nama</th><th>Sales</th><th>Kontak</th><th>Grade</th><th>Skor</th><th>Masalah</th></tr></thead>
+    <tbody>${scored.filter(p=>p.grade==='D'||p.grade==='C').sort((a,b)=>a.score-b.score).slice(0,20).map(p=>`<tr>
+      <td style="font-weight:600">${p['Nama Konsumen']||'—'}</td><td>${p['Nama Sales Executives']||'—'}</td>
+      <td style="font-size:12px;color:var(--text2)">${p['Kontak Konsumen']||'—'}</td>
+      <td>${qtag(p.grade)}</td><td><span style="font-weight:700;color:${gcol(p.grade)}">${p.score}</span></td>
+      <td style="font-size:12px;color:var(--text2)">${p.issues.slice(0,2).join(' · ')||'—'}</td>
+    </tr>`).join('')||'<tr><td colspan="6" class="empty">Semua data kualitas baik! 🎉</td></tr>'}
+    </tbody></table></div>
+  </div>`;
+}
+
+// ================================================================
+// MANAJEMEN TIM
+// ================================================================
+function pgTim(){
+  document.getElementById('main').innerHTML=`${ph('Manajemen Tim')}
+  <div class="chip-group"><div class="chip active" onclick="timTab(this,'manager')">Manager</div><div class="chip" onclick="timTab(this,'assman')">Asst. Manager</div><div class="chip" onclick="timTab(this,'sales')">Sales</div></div>
+  <div id="tim-content"></div>
+  <button class="btn btn-primary" id="tim-add-btn" style="margin-top:0.5rem" onclick="openModal('manager','')">+ Tambah Manager</button>`;
+  renderTimTab('manager');
+}
+let cTab='manager';
+function timTab(el,r){cTab=r;document.querySelectorAll('#main .chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');renderTimTab(r);const b=document.getElementById('tim-add-btn');if(b){b.textContent=`+ Tambah ${ROLE_LABEL[r]||r}`;b.onclick=()=>openModal(r,'');}}
+function renderTimTab(r){
+  const m=(team.members||[]).filter(x=>x.role===r);
+  const rc=ROLE_COLORS[r]||{bg:'#6C63FF',t:'#fff'};
+  document.getElementById('tim-content').innerHTML=m.length?m.map(x=>{
+    const meta=r==='sales'?`${x.project} · Assman: ${x.assman}`:r==='assman'?`Project: ${x.project}`:`Project: ${x.project}`;
+    return`<div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;display:flex;align-items:center;gap:12px;margin-bottom:8px">
+      <div style="width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;background:${rc.bg};color:${rc.t}">${x.nama.charAt(0)}</div>
+      <div style="flex:1"><div style="font-size:13px;font-weight:600">${x.nama}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${meta}</div></div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-sm" onclick="openEditModal('${x.id}')">✏️ Ubah</button>
+        <button class="btn btn-sm btn-danger" onclick="hapusMember('${x.id}')">🗑️</button>
+      </div>
+    </div>`;}).join(''):'<div class="empty">Belum ada anggota</div>';
+}
+let editId=null;
+let chartInstances={};
+function openModal(role,assNama){editId=null;showModal('Tambah Anggota',role,'','',assNama);}
+function openEditModal(id){const m=(team.members||[]).find(x=>x.id===id);if(!m)return;editId=id;showModal('Ubah Anggota',m.role,m.nama,m.project.split(',')[0]||'',m.assman);}
+function showModal(title,role,nama,proj,assNama){
+  const ex=document.getElementById('modal-overlay');if(ex)ex.remove();
+  const div=document.createElement('div');div.id='modal-overlay';
+  div.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;display:flex;align-items:center;justify-content:center;padding:1rem';
+  div.innerHTML=`<div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:1.75rem;width:480px;max-width:100%">
+    <div style="font-size:16px;font-weight:700;margin-bottom:1.25rem">${title}</div>
+    <div class="field"><label>Nama *</label><input type="text" id="m-nama" value="${nama}" placeholder="Nama anggota"></div>
+    <div class="form-row">
+      <div class="field"><label>Role *</label><select id="m-role" onchange="onMRole()"><option value="">--</option><option value="sales" ${role==='sales'?'selected':''}>Sales</option><option value="assman" ${role==='assman'?'selected':''}>Asst. Manager</option><option value="manager" ${role==='manager'?'selected':''}>Manager</option></select></div>
+      <div class="field"><label>Project *</label><select id="m-proj"><option value="">--</option><option value="WBL" ${proj==='WBL'?'selected':''}>WBL</option><option value="KBA" ${proj==='KBA'?'selected':''}>KBA</option><option value="FST" ${proj==='FST'?'selected':''}>FST</option></select></div>
+    </div>
+    <div class="field" id="m-ass-w" style="${role==='sales'?'':'display:none'}"><label>Assman atasan *</label>
+      <select id="m-assman"><option value="">--</option>${getAssmanNames().map(n=>`<option ${n===assNama?'selected':''}>${n}</option>`).join('')}</select>
+    </div>
+    <div class="field"><label>Password awal</label><input type="text" id="m-pw" placeholder="Kosong = default (sales123/assman123)"></div>
+    <div id="m-notice" class="notice notice-red" style="margin-top:8px"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:1rem">
+      <button class="btn" onclick="closeModal()">Batal</button>
+      <button class="btn btn-primary" onclick="simpanAnggota()">💾 Simpan</button>
+    </div>
+  </div>`;
+  document.body.appendChild(div);
+}
+function onMRole(){const r=document.getElementById('m-role').value;const w=document.getElementById('m-ass-w');if(w)w.style.display=r==='sales'?'block':'none';}
+function closeModal(){const el=document.getElementById('modal-overlay');if(el)el.remove();editId=null;}
+function simpanAnggota(){
+  const nama=document.getElementById('m-nama').value.trim();const role=document.getElementById('m-role').value;const proj=document.getElementById('m-proj').value;const pw=document.getElementById('m-pw').value.trim();
+  const mn=document.getElementById('m-notice');mn.style.display='none';
+  if(!nama||!role||!proj){mn.style.display='flex';mn.innerHTML='⚠️ Lengkapi field wajib.';return;}
+  if(role==='sales'&&!(document.getElementById('m-assman').value)){mn.style.display='flex';mn.innerHTML='⚠️ Pilih assman atasan.';return;}
+  if(editId){
+    const m=(team.members||[]).find(x=>x.id===editId);if(!m)return;
+    const oldN=m.nama;const oldR=m.role;
+    if(oldN!==nama){if(passwords[oldR]&&passwords[oldR][oldN]){const op=passwords[oldR][oldN];delete passwords[oldR][oldN];if(!passwords[role])passwords[role]={};passwords[role][nama]=pw||op;}(team.members||[]).forEach(s=>{if(s.role==='sales'&&s.assman===oldN)s.assman=nama;});}
+    m.nama=nama;m.role=role;m.project=proj;if(role==='sales')m.assman=document.getElementById('m-assman').value;
+    if(pw){if(!passwords[role])passwords[role]={};passwords[role][nama]=pw;}
+  } else {
+    if((team.members||[]).find(x=>x.nama===nama&&x.role===role)){mn.style.display='flex';mn.innerHTML='⚠️ Nama sudah terdaftar.';return;}
+    (team.members||(team.members=[])).push({id:genId(),nama,role,project:proj,assman:role==='sales'?(document.getElementById('m-assman').value):''});
+    if(!passwords[role])passwords[role]={};passwords[role][nama]=pw||(role==='sales'?'sales123':role==='assman'?'assman123':'password123');
+  }
+  save();closeModal();if(document.getElementById('tim-content'))renderTimTab(cTab);
+}
+function hapusMember(id){const m=(team.members||[]).find(x=>x.id===id);if(!m)return;if(!confirm(`Hapus ${m.nama}?`))return;team.members=team.members.filter(x=>x.id!==id);save();if(document.getElementById('tim-content'))renderTimTab(cTab);}
+
+// ================================================================
+// ADMIN PASSWORD
+// ================================================================
+function pgAdmin(){
+  document.getElementById('main').innerHTML=`${ph('Admin — Kelola Password & Settings')}
+
+  <!-- EXPORT / IMPORT SETTINGS -->
+  <div class="card" style="border-color:var(--accent);background:linear-gradient(135deg,var(--bg2),var(--accent-bg))">
+    <div class="card-title" style="color:var(--accent)">🔄 Sinkronisasi Antar Device</div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:1rem;line-height:1.6">Ubah password di sini, lalu <strong style="color:var(--text)">Export Settings</strong> → kirim file ke device lain → <strong style="color:var(--text)">Import Settings</strong> di device lain. Semua password & URL sheet langsung tersync.</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="exportSettings()"><i class="ti ti-download"></i> Export Settings</button>
+      <button class="btn" onclick="document.getElementById('import-file').click()"><i class="ti ti-upload"></i> Import Settings</button>
+      <input type="file" id="import-file" accept=".json" style="display:none" onchange="importSettings(this)">
+    </div>
+    <div id="sync-ok" class="notice notice-green" style="margin-top:10px;display:none"></div>
+    <div id="sync-err" class="notice notice-red" style="margin-top:10px;display:none"></div>
+  </div>
+
+  <!-- PASSWORD FIELDS -->
+  <div class="card"><div class="card-title">Password GM</div>${rAdmGrp('gm',['GM'])}</div>
+  <div class="card"><div class="card-title">Password Manager</div>${rAdmGrp('manager',getMgrNames())}</div>
+  <div class="card"><div class="card-title">Password Sales</div>${rAdmGrp('sales',getSalesNames())}</div>
+  <div class="card"><div class="card-title">Password Asst. Manager</div>${rAdmGrp('assman',getAssmanNames())}</div>
+  <div class="card"><div class="card-title">Password Direktur</div>${rAdmGrp('direktur',['Direktur Marketing'])}</div>
+  <div id="adm-ok" class="notice notice-green" style="display:none;margin-top:10px"></div>`;
+}
+
+function exportSettings(){
+  const data={
+    _info:'CRM Property Settings — Export dari mpls-db.netlify.app',
+    _tanggal:new Date().toLocaleString('id-ID'),
+    passwords,
+    assmanURLs,
+    team
+  };
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='CRM_Settings_'+new Date().toISOString().split('T')[0]+'.json';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  const ok=document.getElementById('sync-ok');
+  ok.style.display='flex';ok.innerHTML='✅ Settings berhasil di-export! Kirim file ini ke device lain lalu klik Import.';
+  setTimeout(()=>ok.style.display='none',5000);
+}
+
+function importSettings(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const data=JSON.parse(e.target.result);
+      if(!data.passwords&&!data.assmanURLs){throw new Error('Format file tidak valid.');}
+      if(data.passwords)passwords=data.passwords;
+      if(data.assmanURLs)assmanURLs={...DEF_URLS,...data.assmanURLs};
+      if(data.team)team=data.team;
+      save();
+      const ok=document.getElementById('sync-ok');
+      ok.style.display='flex';ok.innerHTML='✅ Settings berhasil di-import! Semua password & URL sheet sudah tersync.';
+      setTimeout(()=>{ok.style.display='none';pgAdmin();},3000);
+    }catch(err){
+      const er=document.getElementById('sync-err');
+      er.style.display='flex';er.innerHTML='❌ Gagal import: '+err.message;
+      setTimeout(()=>er.style.display='none',5000);
+    }
+  };
+  reader.readAsText(file);
+  input.value='';
+}
+
+function rAdmGrp(role,names){return`<div>${names.map(n=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+  <div style="width:160px;font-size:13px;font-weight:600">${n}</div>
+  <div style="flex:1;position:relative"><input type="password" id="adm-${role}-${n.replace(/[\s]/g,'_')}" value="${(passwords[role]||{})[n]||''}" style="padding-right:36px">
+  <button class="pw-eye" onclick="tglPW('adm-${role}-${n.replace(/[\s]/g,'_')}',this)"><i class="ti ti-eye"></i></button></div>
+  <button class="btn btn-sm btn-primary" style="flex-shrink:0" onclick="admSave('${role}','${n}')">Simpan</button>
+</div>`).join('')}</div>`;}
+function admSave(role,name){const key='adm-'+role+'-'+name.replace(/[\s]/g,'_');const el=document.getElementById(key);if(!el){alert('Field tidak ditemukan.');return;}const newPw=el.value.trim();if(!newPw){alert('Tidak boleh kosong.');return;}if(!passwords[role])passwords[role]={};passwords[role][name]=newPw;save();const ok=document.getElementById('adm-ok');if(ok){ok.style.display='flex';ok.innerHTML=`✅ Password <strong>${name}</strong> diubah!`;setTimeout(()=>ok.style.display='none',3000);}}
+
+// ================================================================
+// DIREKTUR
+// ================================================================
+function pgDD(){
+  const allData=getAllSheetData();
+  const sq=allData.map(r=>scoreP(r));const aq=sq.length?Math.round(sq.reduce((a,b)=>a+b.score,0)/sq.length):0;
+  document.getElementById('main').innerHTML=`${ph('Overview Direktur')}
+  <div class="grid4">${mcrd('Total Data',allData.length,'var(--accent)','semua assman','📊')}${mcrd('Masih FU',allData.filter(r=>r['Status Konsumen']==='Masih bisa di FU').length,'var(--green)','','📞')}${mcrd('Tidak FU',allData.filter(r=>r['Status Konsumen']==='Tidak bisa di FU').length,'var(--red)','','🚫')}${mcrd('Kualitas DB',aq+'%',aq>=70?'var(--green)':aq>=50?'var(--amber)':'var(--red)','','⭐')}</div>
+  <div class="card"><div class="card-title">Per Assman</div><table><thead><tr><th>Assman</th><th>Project</th><th>Total</th><th>Masih FU</th><th>Tidak FU</th><th>Grade DB</th></tr></thead>
+  <tbody>${getAssmanNames().map(a=>{const d=getSheetData(a);if(!d.length&&!getScriptURL(a))return'';const sq2=d.map(r=>scoreP(r));const ag=sq2.length?Math.round(sq2.reduce((a,b)=>a+b.score,0)/sq2.length):0;const g=ag>=80?'A':ag>=60?'B':ag>=35?'C':'D';const m=(team.members||[]).find(x=>x.role==='assman'&&x.nama===a);return`<tr><td style="font-weight:600">${a}</td><td><span class="tag tag-accent">${m?m.project:''}</span></td><td>${d.length}</td><td><span class="tag tag-green">${d.filter(r=>r['Status Konsumen']==='Masih bisa di FU').length}</span></td><td><span class="tag tag-red">${d.filter(r=>r['Status Konsumen']==='Tidak bisa di FU').length}</span></td><td>${qtag(g)}</td></tr>`;}).join('')}</tbody></table>
+  </div><button class="btn btn-primary" onclick="refreshAndGo('d-dash')"><i class="ti ti-refresh"></i> Refresh</button>`;
+}
+function pgDDB(){
+  document.getElementById('main').innerHTML=`${ph('Database')}
+  <div style="display:flex;gap:8px;margin-bottom:1rem"><input type="text" id="ddb-q" placeholder="🔍 Cari..." oninput="rDDB()" style="flex:1"></div>
+  <div class="card" style="padding:0;overflow:hidden"><div class="overflow-auto"><table><thead><tr><th>Tanggal</th><th>Assman</th><th>Sales</th><th>Nama</th><th>Kontak</th><th>Sumber</th><th>Status</th><th>Grade</th></tr></thead><tbody id="ddb-body"></tbody></table></div></div>
+  <button class="btn btn-primary" style="margin-top:1rem" onclick="refreshAndGo('d-db')"><i class="ti ti-refresh"></i> Refresh</button>`;rDDB();
+}
+function rDDB(){
+  const q=(document.getElementById('ddb-q')||{value:''}).value.toLowerCase();
+  const rows=[];
+  getAssmanNames().forEach(a=>{getSheetData(a).filter(r=>!q||(r['Nama Konsumen']||'').toLowerCase().includes(q)||(r['Kontak Konsumen']||'').includes(q)).forEach(r=>rows.push({...r,_assman:a}));});
+  document.getElementById('ddb-body').innerHTML=rows.length?rows.map(r=>{const qr=scoreP(r);return`<tr><td style="font-size:11px;color:var(--text2)">${r['Tanggal']||'—'}</td><td style="font-size:12px">${r._assman}</td><td style="font-weight:600;font-size:12px">${r['Nama Sales Executives']||'—'}</td><td>${r['Nama Konsumen']||'—'}</td><td style="font-size:12px;color:var(--text2)">${r['Kontak Konsumen']||'—'}</td><td style="font-size:12px">${r['Sumber Konsumen']||'—'}</td><td>${stag(r['Status Konsumen'])}</td><td>${qtag(qr.grade)}</td></tr>`;}).join(''):'<tr><td colspan="8" class="empty">Tidak ada data</td></tr>';
+}
+
+// ================================================================
+// REFRESH HELPER
+// ================================================================
+async function refreshAndGo(page){
+  // Tampilkan feedback loading di tombol jika ada
+  const btns=document.querySelectorAll('[onclick*="refreshAndGo"]');
+  btns.forEach(b=>{b._orig=b.innerHTML;b.innerHTML='<span class="spinner"></span> Memuat...';b.disabled=true;});
+  try{
+    await fetchMyData();
+  } catch(e){
+    console.error('Refresh error:',e);
+  }
+  btns.forEach(b=>{if(b._orig){b.innerHTML=b._orig;b.disabled=false;}});
+  goPage(page);
+}
+
+// ================================================================
+// INIT — Load config dari Google Sheet saat pertama buka
+// ================================================================
+// Init saat DOM siap
+function initApp(){
+  initData();
+  const loginScreen=document.getElementById('screen-login');
+  if(loginScreen)loginScreen.classList.add('active');
+  pilihRole('sales',document.querySelector('.role-btn'));
+  // Load config dari sheet di background - semua device dapat data terbaru
+  loadConfigFromSheet().then(ok=>{
+    if(ok){
+      // Refresh dropdown setelah config loaded
+      pilihRole(selectedRole,document.querySelector('.role-btn.selected')||document.querySelector('.role-btn'));
+      console.log('Config refreshed from sheet');
+    }
+  }).catch(e=>console.warn('Config refresh failed:',e));
+}
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',initApp);
+}else{
+  initApp();
+}
+</script>
+</body>
+</html>
