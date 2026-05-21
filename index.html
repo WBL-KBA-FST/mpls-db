@@ -974,7 +974,7 @@ async function pgSFU(){
     if(syncEl)syncEl.style.display='flex';
     fetchAssmanData(ass).then(()=>{
       if(syncEl)syncEl.style.display='none';
-      rSFU('');
+      // Tidak re-render otomatis agar user tidak kehilangan input yang sedang diisi
     }).catch(err=>{
       if(syncEl)syncEl.style.display='none';
       const errEl=document.getElementById('sfu-err');
@@ -1050,26 +1050,25 @@ function rSFU(st){
           <textarea id="fu-ket-${i}" placeholder="Respons konsumen, keberatan, komitmen, langkah berikutnya..." style="font-size:13px;height:80px;resize:vertical">${r['Keterangan']||''}</textarea>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
-          <button class="btn btn-primary fu-simpan-btn" data-i="${i}" data-kontak="${String(r['Kontak Konsumen']||'')}">💾 Simpan</button>
+          <input type="hidden" id="fu-kontak-${i}" value="${String(r['Kontak Konsumen']||'')}"><button class="btn btn-primary" onclick="doUpdateFU(${i})">💾 Simpan</button>
+
           <div id="fu-ok-${i}" class="notice notice-green" style="flex:1;margin:0;display:none;padding:6px 12px">✅ Tersimpan!</div>
           <div id="fu-err-${i}" class="notice notice-red" style="flex:1;margin:0;display:none;padding:6px 12px"></div>
         </div>
       </div>
     </div>`;}).join(''):'<div class="empty">Tidak ada data 📭</div>';
-  // Event delegation untuk tombol Simpan FU
-  setTimeout(()=>{
-    const list=document.getElementById('sfu-list');
-    if(list){
-      list.querySelectorAll('.fu-simpan-btn').forEach(btn=>{
-        btn.addEventListener('click',function(){
-          const i=this.getAttribute('data-i');
-          const kontak=this.getAttribute('data-kontak');
-          updateFU(parseInt(i),kontak);
-        });
-      });
-    }
-  },100);
+
 }
+
+// Wrapper global untuk dipanggil dari onclick HTML
+window.doUpdateFU = function(i, kontak) {
+  // Kalau kontak tidak dikirim, baca dari hidden input
+  if(!kontak) {
+    const el = document.getElementById('fu-kontak-'+i);
+    kontak = el ? el.value : '';
+  }
+  updateFU(i, kontak);
+};
 
 async function updateFU(i, kontak){
   try{
