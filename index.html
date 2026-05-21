@@ -1016,7 +1016,7 @@ async function pgSFU(){
 
   if(sudahAdaCache){
     // Tampilkan cache dulu — langsung tanpa tunggu
-    rSFU('');
+    rSFU('__due__');
     // Fetch di background
     const syncEl=document.getElementById('sfu-sync');
     if(syncEl)syncEl.style.display='flex';
@@ -1049,9 +1049,19 @@ function sfF(el,v){document.querySelectorAll('#main .chip').forEach(c=>c.classLi
 function rSFU(st){
   const today=todayISO();
   let data=getMySheetData();
-  if(st)data=data.filter(r=>r['Status Konsumen']===st);
+  if(st==='__due__'){
+    data=data.filter(r=>{
+      const aktif=!['Tidak bisa di FU','Non prospek','Tidak minat apt'].includes(r['Status Konsumen']);
+      if(!aktif)return false;
+      const tgl=normTgl(String(r['Jadwal FU']||''));
+      return !tgl||tgl<=today;
+    });
+  } else if(st){
+    data=data.filter(r=>r['Status Konsumen']===st);
+  }
   data.sort((a,b)=>{
-    const ta=a['Jadwal FU']||'9999';const tb=b['Jadwal FU']||'9999';
+    const ta=normTgl(String(a['Jadwal FU']||''))||'9999';
+    const tb=normTgl(String(b['Jadwal FU']||''))||'9999';
     return ta.localeCompare(tb);
   });
   document.getElementById('sfu-list').innerHTML=data.length?data.slice(0,50).map((r,i)=>{
