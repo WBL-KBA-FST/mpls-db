@@ -1072,32 +1072,41 @@ function rSFU(st){
 }
 
 async function updateFU(i, kontak){
-  const jadwal=document.getElementById('fu-jadwal-'+i).value;
-  const status=document.getElementById('fu-status-'+i).value;
-  const ket=document.getElementById('fu-ket-'+i).value;
-  const dok=document.getElementById('fu-dok-'+i).value;
-  const ass=getAssmanOfSales(currentName);
-  const btn=document.querySelector(`[onclick="updateFU(${i},'${kontak.replace(/'/g,"\'")}")"]`);
-  // Update lokal cache
-  const idx=sheetCache[ass]?sheetCache[ass].findIndex(r=>normK(String(r['Kontak Konsumen']||''))===normK(kontak)&&r['Nama Sales Executives']===currentName):-1;
-  if(idx>=0){
-    sheetCache[ass][idx]['Jadwal FU']=jadwal;
-    sheetCache[ass][idx]['Status Konsumen']=status;
-    sheetCache[ass][idx]['Keterangan']=ket;
-    sheetCache[ass][idx]['Keterangan2']=dok;
-  }
-  // Kirim ke sheet
-  const result=await callSheet(ass,'updateProspek',{
-    kontakKonsumen:kontak,namaSales:currentName,
-    statusKonsumen:status,jadwalFU:jadwal,
-    keterangan:ket,dokumen:dok
-  });
-  const ok=document.getElementById('fu-ok-'+i);
-  const err=document.getElementById('fu-err-'+i);
-  if(result&&result.success){
-    if(ok){ok.style.display='flex';setTimeout(()=>ok.style.display='none',3000);}
-  } else {
-    if(err){err.style.display='flex';err.innerHTML='❌ '+(result?result.message:'Gagal simpan');setTimeout(()=>err.style.display='none',5000);}
+  try{
+    const jadwal=(document.getElementById('fu-jadwal-'+i)||{value:''}).value;
+    const status=(document.getElementById('fu-status-'+i)||{value:''}).value;
+    const ket=(document.getElementById('fu-ket-'+i)||{value:''}).value;
+    const dok=(document.getElementById('fu-dok-'+i)||{value:''}).value;
+    const ass=getAssmanOfSales(currentName);
+    // Tampilkan loading di tombol
+    const btn=document.querySelector('.fu-simpan-btn[data-i="'+i+'"]');
+    if(btn){btn.innerHTML='<span class="spinner"></span>';btn.disabled=true;}
+    // Update lokal cache
+    const cidx=sheetCache[ass]?sheetCache[ass].findIndex(r=>normK(String(r['Kontak Konsumen']||''))===normK(kontak)&&r['Nama Sales Executives']===currentName):-1;
+    if(cidx>=0){
+      sheetCache[ass][cidx]['Jadwal FU']=jadwal;
+      sheetCache[ass][cidx]['Status Konsumen']=status;
+      sheetCache[ass][cidx]['Keterangan']=ket;
+      sheetCache[ass][cidx]['Keterangan2']=dok;
+    }
+    // Kirim ke sheet
+    const result=await callSheet(ass,'updateProspek',{
+      kontakKonsumen:kontak,namaSales:currentName,
+      statusKonsumen:status,jadwalFU:jadwal,
+      keterangan:ket,dokumen:dok
+    });
+    if(btn){btn.innerHTML='💾 Simpan';btn.disabled=false;}
+    const ok=document.getElementById('fu-ok-'+i);
+    const err=document.getElementById('fu-err-'+i);
+    if(result&&result.success){
+      if(ok){ok.style.display='flex';setTimeout(()=>{if(ok)ok.style.display='none';},3000);}
+    } else {
+      if(err){err.style.display='flex';err.innerHTML='❌ '+(result?result.message:'Gagal simpan');setTimeout(()=>{if(err)err.style.display='none';},5000);}
+    }
+  }catch(e){
+    console.error('updateFU error:',e);
+    const err=document.getElementById('fu-err-'+i);
+    if(err){err.style.display='flex';err.innerHTML='❌ Error: '+e.message;setTimeout(()=>{if(err)err.style.display='none';},5000);}
   }
 }
 
