@@ -501,9 +501,41 @@ function validateHP(hp){
   return{valid:true,clean:norm};
 }
 function todayISO(){return new Date().toISOString().split('T')[0];}
+
+// Normalisasi tanggal ke format yyyy-mm-dd
+// Handle: "2026-05-21", "21/05/2026", "21-05-2026", Date object
+function normTgl(tgl){
+  if(!tgl)return '';
+  if(tgl instanceof Date){
+    return tgl.toISOString().split('T')[0];
+  }
+  const s=String(tgl).trim();
+  if(!s)return '';
+  // Format yyyy-mm-dd (sudah benar)
+  if(/^\d{4}-\d{2}-\d{2}/.test(s))return s.substring(0,10);
+  // Format dd/mm/yyyy atau dd-mm-yyyy
+  const m=s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);
+  if(m)return m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');
+  return s;
+}
+
+// Cek apakah tanggal jadwal sudah lewat atau hari ini
+function isTglDue(tgl){
+  const n=normTgl(tgl);
+  if(!n)return false;
+  return n<=todayISO();
+}
+
+// Cek apakah tanggal segera (dalam 3 hari)
+function isTglSoon(tgl){
+  const n=normTgl(tgl);
+  if(!n)return false;
+  const diff=(new Date(n)-new Date())/(864e5);
+  return diff>0&&diff<=3;
+}
 function formatTgl(iso){if(!iso)return'—';const[y,m,d]=iso.split('-');return`${d}/${m}/${y}`;}
 function isDueToday(iso){return iso&&iso<=todayISO();}
-function isDueSoon(iso){if(!iso)return false;const diff=(new Date(iso)-new Date())/(864e5);return diff>=0&&diff<=3;}
+function isDueSoon(iso){return isTglSoon(iso);}
 function stag(s){
   const m={'Masih bisa di FU':'<span class="tag tag-green">● Masih bisa di FU</span>','Tidak bisa di FU':'<span class="tag tag-red">● Tidak bisa di FU</span>','Tidak minat apt':'<span class="tag tag-red">● Tidak minat</span>','Non prospek':'<span class="tag tag-gray">● Non prospek</span>'};
   return m[s]||`<span class="tag tag-amber">● ${s||'—'}</span>`;
@@ -735,7 +767,7 @@ async function pgSD(){
   const urlOK=!!getScriptURL(ass);
   const sq=data.map(r=>scoreP(r));const aq=sq.length?Math.round(sq.reduce((a,b)=>a+b.score,0)/sq.length):0;
   const today=todayISO();
-  const fuHariIni=data.filter(r=>r['Jadwal FU']&&r['Jadwal FU']<=today&&r['Status Konsumen']==='Masih bisa di FU');
+  const fuHariIni=data.filter(r=>r['Jadwal FU']&&isTglDue(r['Jadwal FU'])&&(r['Status Konsumen']==='Masih bisa di FU'||r['Status Konsumen']==='Tertarik'));
   const tertarik=data.filter(r=>r['Status Konsumen']==='Tertarik'||r['Status Konsumen']==='Masih bisa di FU');
   document.getElementById('main').innerHTML=`${ph('Dashboard Saya','Selamat datang, '+currentName)}
   ${!urlOK?`<div class="notice notice-amber" style="display:flex;margin-bottom:1rem"><i class="ti ti-alert-triangle" style="flex-shrink:0"></i> Sheet belum terhubung. Hubungi GM.</div>`:''}
@@ -1007,8 +1039,8 @@ function rSFU(st){
     return ta.localeCompare(tb);
   });
   document.getElementById('sfu-list').innerHTML=data.length?data.slice(0,50).map((r,i)=>{
-    const tgl=r['Jadwal FU']||'';
-    const isLate=tgl&&tgl<today;const isToday=tgl===today;const isSoon=isDueSoon(tgl)&&tgl>today;
+    const tglRaw=r['Jadwal FU']||'';const tgl=normTgl(tglRaw)||tglRaw;
+    const isLate=tgl&&tgl<todayISO();const isToday=tgl===todayISO();const isSoon=isDueSoon(tgl)&&!isLate&&!isToday;
     const borderColor=isLate||isToday?'rgba(239,68,68,0.5)':isSoon?'rgba(168,85,247,0.4)':'var(--border)';
     return`<div class="fu-card" style="border-color:${borderColor};margin-bottom:12px">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
