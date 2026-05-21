@@ -767,7 +767,7 @@ async function pgSD(){
   const urlOK=!!getScriptURL(ass);
   const sq=data.map(r=>scoreP(r));const aq=sq.length?Math.round(sq.reduce((a,b)=>a+b.score,0)/sq.length):0;
   const today=todayISO();
-  const fuHariIni=data.filter(r=>r['Jadwal FU']&&isTglDue(r['Jadwal FU'])&&(r['Status Konsumen']==='Masih bisa di FU'||r['Status Konsumen']==='Tertarik'));
+  const fuHariIni=data.filter(r=>r['Jadwal FU']&&isTglDue(r['Jadwal FU'])&&r['Status Konsumen']!=='Tidak bisa di FU'&&r['Status Konsumen']!=='Non prospek'&&r['Status Konsumen']!=='Tidak minat apt');
   const tertarik=data.filter(r=>r['Status Konsumen']==='Tertarik'||r['Status Konsumen']==='Masih bisa di FU');
   document.getElementById('main').innerHTML=`${ph('Dashboard Saya','Selamat datang, '+currentName)}
   ${!urlOK?`<div class="notice notice-amber" style="display:flex;margin-bottom:1rem"><i class="ti ti-alert-triangle" style="flex-shrink:0"></i> Sheet belum terhubung. Hubungi GM.</div>`:''}
