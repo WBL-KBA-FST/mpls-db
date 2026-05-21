@@ -500,22 +500,32 @@ function validateHP(hp){
   if(!/^08[0-9]{8,11}$/.test(norm))return{valid:false,reason:'Format salah. Gunakan: 08xx-xxxx-xxxx (10-13 digit)',clean:norm};
   return{valid:true,clean:norm};
 }
-function todayISO(){return new Date().toISOString().split('T')[0];}
+function todayISO(){
+  const now=new Date();
+  const y=now.getFullYear();
+  const m=String(now.getMonth()+1).padStart(2,'0');
+  const d=String(now.getDate()).padStart(2,'0');
+  return y+'-'+m+'-'+d;
+}
 
 // Normalisasi tanggal ke format yyyy-mm-dd
 // Handle: "2026-05-21", "21/05/2026", "21-05-2026", Date object
 function normTgl(tgl){
   if(!tgl)return '';
   if(tgl instanceof Date){
-    return tgl.toISOString().split('T')[0];
+    // Gunakan local date bukan UTC untuk hindari timezone shift
+    const y=tgl.getFullYear();
+    const m=String(tgl.getMonth()+1).padStart(2,'0');
+    const d=String(tgl.getDate()).padStart(2,'0');
+    return y+'-'+m+'-'+d;
   }
   const s=String(tgl).trim();
   if(!s)return '';
-  // Format yyyy-mm-dd (sudah benar)
+  // Format yyyy-mm-dd (sudah benar, tidak perlu parse ulang)
   if(/^\d{4}-\d{2}-\d{2}/.test(s))return s.substring(0,10);
   // Format dd/mm/yyyy atau dd-mm-yyyy
-  const m=s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);
-  if(m)return m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');
+  const mx=s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);
+  if(mx)return mx[3]+'-'+mx[2].padStart(2,'0')+'-'+mx[1].padStart(2,'0');
   return s;
 }
 
@@ -533,7 +543,13 @@ function isTglSoon(tgl){
   const diff=(new Date(n)-new Date())/(864e5);
   return diff>0&&diff<=3;
 }
-function formatTgl(iso){if(!iso)return'—';const[y,m,d]=iso.split('-');return`${d}/${m}/${y}`;}
+function formatTgl(tgl){
+  if(!tgl)return '—';
+  const s=normTgl(tgl);
+  if(!s||!s.includes('-'))return String(tgl);
+  const[y,m,d]=s.split('-');
+  return d+'/'+m+'/'+y;
+}
 function isDueToday(iso){return iso&&iso<=todayISO();}
 function isDueSoon(iso){return isTglSoon(iso);}
 function stag(s){
